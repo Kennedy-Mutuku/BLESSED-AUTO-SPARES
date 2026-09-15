@@ -29,17 +29,17 @@ export function DashboardPage() {
     <div className="flex flex-col min-h-screen bg-white overflow-y-auto">
 
       {/* ── TOP BAR ── */}
-      <div className="flex items-center justify-between px-5 pt-6 pb-0 shrink-0">
+      <div className="flex items-center justify-between px-5 py-4 bg-slate-900 shadow-md shrink-0">
         {/* Logo mark + shop name */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shadow-sm overflow-hidden">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-red-500 shadow-sm">
             <img src={logoImg} alt="logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <p className="text-[11px] font-extrabold tracking-widest text-red-600 uppercase leading-none">
+            <p className="text-[12px] font-extrabold tracking-widest text-red-400 uppercase leading-none">
               {shopName}
             </p>
-            <p className="text-[9px] text-slate-400 tracking-widest uppercase mt-0.5">
+            <p className="text-[9px] text-slate-400 tracking-widest uppercase mt-1">
               AUTO PARTS &amp; ACCESSORIES
             </p>
           </div>
@@ -48,10 +48,10 @@ export function DashboardPage() {
         {/* Hamburger */}
         <button
           onClick={() => setMenuOpen(true)}
-          className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center"
+          className="w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors"
           aria-label="Open menu"
         >
-          <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+          <Menu className="w-5 h-5 text-white" />
         </button>
       </div>
 
