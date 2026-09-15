@@ -56,9 +56,12 @@ export function SalesLogPage() {
         subtitle={`${filtered.length} sales`}
         backTo="/"
         actions={
-          <Button variant="outline" size="sm" onClick={handleExport}>
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/40 hover:border-white/70 text-white text-sm font-medium transition-colors"
+          >
             <Download className="h-4 w-4" /> CSV
-          </Button>
+          </button>
         }
       />
 

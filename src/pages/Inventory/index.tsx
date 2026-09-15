@@ -57,9 +57,12 @@ export function InventoryPage() {
         subtitle={`${products.length} products`}
         backTo="/"
         actions={
-          <Button size="sm" onClick={() => setAddOpen(true)}>
+          <button
+            onClick={() => setAddOpen(true)}
+            className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors"
+          >
             <Plus className="h-4 w-4" /> Add
-          </Button>
+          </button>
         }
       />
 

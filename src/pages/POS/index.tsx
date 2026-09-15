@@ -81,12 +81,12 @@ export function POSPage() {
     <div className="flex flex-col min-h-screen">
 
       {/* ── STICKY HEADER ── */}
-      <div className="shrink-0 px-4 pt-4 pb-3 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
+      <div className="shrink-0 px-4 pt-4 pb-3 bg-slate-900">
         <PageHeader title="Selling" backTo="/" />
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
           <Input
-            className="pl-10 h-12 text-base"
+            className="pl-10 h-12 text-base bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-red-500"
             placeholder="Search product by name or part number…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -94,12 +94,12 @@ export function POSPage() {
           />
           {search && (
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xl leading-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xl leading-none"
               onClick={() => setSearch('')}
             >×</button>
           )}
         </div>
-        <p className="text-xs text-slate-400 mt-1.5">
+        <p className="text-xs text-slate-500 mt-1.5">
           {displayed.length} item{displayed.length !== 1 ? 's' : ''} in stock
           {search && ` (filtered)`}
         </p>
