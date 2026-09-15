@@ -36,10 +36,10 @@ export function DashboardPage() {
             <img src={logoImg} alt="logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <p className="text-[12px] font-extrabold tracking-widest text-red-400 uppercase leading-none">
+            <p className="text-[18px] font-black tracking-wide text-white uppercase leading-none drop-shadow-sm">
               {shopName}
             </p>
-            <p className="text-[9px] text-slate-400 tracking-widest uppercase mt-1">
+            <p className="text-[9px] text-red-400 tracking-widest uppercase mt-1 font-semibold">
               AUTO PARTS &amp; ACCESSORIES
             </p>
           </div>
