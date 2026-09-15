@@ -3,7 +3,6 @@ import { Plus, Search, Package, Pencil, RefreshCw, Trash2 } from 'lucide-react'
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
 import { useSettings } from '@/hooks/useLocalSettings'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { StockBadge } from '@/components/shared/StockBadge'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -43,7 +42,7 @@ export function InventoryPage() {
   }, [products, search, categoryFilter, statusFilter])
 
   async function handleDelete(product: Product) {
-    if (!confirm(`Archive "${product.name}"? It will be hidden but sales history preserved.`)) return
+    if (!confirm(`Archive "${product.name}"? Sales history preserved.`)) return
     await deleteProduct.mutateAsync(product.id)
     toast.success('Product archived')
   }
@@ -51,139 +50,188 @@ export function InventoryPage() {
   const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c]))
 
   return (
-    <div className="flex flex-col min-h-screen p-4">
-      <PageHeader
-        title="Stock Entry"
-        subtitle={`${products.length} products`}
-        backTo="/"
-        actions={
-          <button
-            onClick={() => setAddOpen(true)}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors"
-          >
-            <Plus className="h-4 w-4" /> Add
-          </button>
-        }
-      />
+    <div className="flex flex-col h-dvh bg-white overflow-hidden">
 
-      {/* Filters */}
-      <div className="space-y-2 mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input
-            className="pl-9"
-            placeholder="Search by name or SKU..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+      {/* ── STICKY HEADER ── */}
+      <div className="shrink-0">
+
+        {/* Dark bar (p-4 wrapper so PageHeader negative margins work) */}
+        <div className="px-4 pt-4 bg-slate-900">
+          <PageHeader
+            title="Stock Entry"
+            subtitle={`${products.length} product${products.length !== 1 ? 's' : ''}`}
+            backTo="/"
+            actions={
+              <button
+                onClick={() => setAddOpen(true)}
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors"
+              >
+                <Plus className="h-4 w-4" /> Add
+              </button>
+            }
           />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          <button
-            onClick={() => setCategoryFilter('all')}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${categoryFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
-          >
-            All Categories
-          </button>
-          {categories.map((c) => (
+
+        {/* White filter bar */}
+        <div className="bg-white border-b border-slate-100 px-4 pt-2 pb-2 space-y-1.5">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              className="pl-9 h-9 text-sm"
+              placeholder="Search by name or SKU…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          {/* Category + Status pills — single scrollable row */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
             <button
-              key={c.id}
-              onClick={() => setCategoryFilter(c.id)}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${categoryFilter === c.id ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          {(['all', 'low', 'out'] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${statusFilter === s ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
-            >
-              {s === 'all' ? 'All Stock' : s === 'low' ? 'Low Stock' : 'Out of Stock'}
-            </button>
-          ))}
+              onClick={() => setCategoryFilter('all')}
+              className={`shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
+                categoryFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+              }`}
+            >All</button>
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setCategoryFilter(c.id)}
+                className={`shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
+                  categoryFilter === c.id ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'
+                }`}
+              >{c.name}</button>
+            ))}
+            <div className="w-px h-3 bg-slate-200 shrink-0 mx-1" />
+            {(['all', 'low', 'out'] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors ${
+                  statusFilter === s
+                    ? s === 'out' ? 'bg-red-500 text-white'
+                      : s === 'low' ? 'bg-amber-500 text-white'
+                      : 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                {s === 'all' ? 'All Stock' : s === 'low' ? 'Low Stock' : 'Out of Stock'}
+              </button>
+            ))}
+          </div>
+
+          {/* Result count */}
+          <p className="text-[10px] text-slate-400">
+            Showing {filtered.length} of {products.length} products
+          </p>
         </div>
       </div>
 
-      {/* Product List */}
-      {isLoading ? (
-        <div className="text-center py-12 text-slate-400">Loading...</div>
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          icon={Package}
-          title="No products found"
-          description="Add your first product to get started"
-          action={<Button onClick={() => setAddOpen(true)}><Plus className="h-4 w-4" /> Add Product</Button>}
-        />
-      ) : (
-        <div className="space-y-2">
-          {filtered.map((product) => {
-            const margin = profitMargin(product.buyingPrice, product.sellingPrice)
-            const cat = categoryMap[product.categoryId]
-            return (
-              <div
-                key={product.id}
-                className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-700"
+      {/* ── SCROLLABLE LIST ── */}
+      <div className="flex-1 overflow-y-auto bg-white">
+        {isLoading ? (
+          <div className="text-center py-12 text-slate-400 text-sm">Loading…</div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title="No products found"
+            description="Add your first product to get started"
+            action={
+              <button
+                onClick={() => setAddOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-colors"
               >
-                <div className="flex items-start justify-between gap-3">
-                  {/* Product thumbnail */}
+                <Plus className="h-4 w-4" /> Add Product
+              </button>
+            }
+          />
+        ) : (
+          <div className="divide-y divide-slate-50">
+            {filtered.map((product, index) => {
+              const margin = profitMargin(product.buyingPrice, product.sellingPrice)
+              const cat = categoryMap[product.categoryId]
+              return (
+                <div
+                  key={product.id}
+                  className="flex items-center gap-2.5 px-3 py-2.5 bg-white hover:bg-slate-50 transition-colors"
+                >
+                  {/* Row number */}
+                  <span className="w-5 text-center text-[10px] font-bold text-slate-300 shrink-0 select-none">
+                    {index + 1}
+                  </span>
+
+                  {/* Thumbnail */}
                   {product.imageDataUrl ? (
                     <img
                       src={product.imageDataUrl}
                       alt={product.name}
-                      className="w-14 h-14 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-slate-600"
+                      className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-100"
                     />
                   ) : (
-                    <div className="w-14 h-14 rounded-lg bg-slate-100 dark:bg-slate-700 shrink-0 flex items-center justify-center">
-                      <Package className="w-6 h-6 text-slate-300 dark:text-slate-500" />
+                    <div className="w-10 h-10 rounded-lg bg-slate-100 shrink-0 flex items-center justify-center">
+                      <Package className="w-5 h-5 text-slate-300" />
                     </div>
                   )}
+
+                  {/* Product info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">{product.name}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[13px] font-semibold text-slate-900 leading-tight truncate">
+                        {product.name}
+                      </span>
                       {cat && (
                         <span
-                          className="text-xs px-2 py-0.5 rounded-full text-white"
+                          className="text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium shrink-0"
                           style={{ background: cat.colorHex || '#6b7280' }}
-                        >
-                          {cat.name}
-                        </span>
+                        >{cat.name}</span>
                       )}
                     </div>
-                    {product.sku && <div className="text-xs text-slate-400 mt-0.5">SKU: {product.sku}</div>}
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
+                    <div className="flex items-center gap-2 mt-0.5">
                       <StockBadge stock={product.stockQuantity} reorderLevel={product.reorderLevel} />
-                      <span className="text-xs text-slate-500">
+                      <span className="text-[10px] text-slate-400">
                         Buy: {formatCurrency(product.buyingPrice, currency)}
                       </span>
-                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                      <span className="text-[10px] font-medium text-slate-600">
                         Sell: {formatCurrency(product.sellingPrice, currency)}
                       </span>
-                      <span className={`text-xs font-medium ${profitMarginClass(margin)}`}>
-                        {margin.toFixed(0)}% margin
+                      <span className={`text-[10px] font-bold ${profitMarginClass(margin)}`}>
+                        {margin.toFixed(0)}%
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="icon-sm" onClick={() => setRestockProduct(product)} title="Restock">
-                      <RefreshCw className="h-4 w-4 text-green-600" />
-                    </Button>
-                    <Button variant="ghost" size="icon-sm" onClick={() => setEditProduct(product)} title="Edit">
-                      <Pencil className="h-4 w-4 text-blue-600" />
-                    </Button>
-                    <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(product)} title="Archive">
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+
+                  {/* Action icons */}
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={() => setRestockProduct(product)}
+                      className="p-1.5 rounded-lg hover:bg-green-50 transition-colors"
+                      title="Restock"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-green-600" />
+                    </button>
+                    <button
+                      onClick={() => setEditProduct(product)}
+                      className="p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+                      title="Edit"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-blue-500" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product)}
+                      className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                      title="Archive"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                    </button>
                   </div>
                 </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+              )
+            })}
+          </div>
+        )}
+      </div>
 
+      {/* Modals */}
       <ProductFormModal open={addOpen} onClose={() => setAddOpen(false)} />
       <ProductFormModal open={!!editProduct} onClose={() => setEditProduct(null)} product={editProduct} />
       <RestockModal open={!!restockProduct} onClose={() => setRestockProduct(null)} product={restockProduct} />
