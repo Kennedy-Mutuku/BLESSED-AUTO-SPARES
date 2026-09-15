@@ -157,7 +157,7 @@ export function InventoryPage() {
                   className="flex items-center gap-2.5 px-3 py-2.5 bg-white hover:bg-slate-50 transition-colors"
                 >
                   {/* Row number */}
-                  <span className="w-5 text-center text-[10px] font-bold text-slate-300 shrink-0 select-none">
+                  <span className="w-4 text-right text-[10px] font-bold text-slate-300 shrink-0 select-none">
                     {index + 1}
                   </span>
 
@@ -175,62 +175,53 @@ export function InventoryPage() {
                     </div>
                   )}
 
-                  {/* Product info */}
+                  {/* Product info — full width column */}
                   <div className="flex-1 min-w-0">
-                    {/* Line 1: name + category */}
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[13px] font-semibold text-slate-900 leading-tight truncate">
-                        {product.name}
-                      </span>
-                      {cat && (
-                        <span
-                          className="text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium shrink-0 whitespace-nowrap"
-                          style={{ background: cat.colorHex || '#6b7280' }}
-                        >{cat.name}</span>
-                      )}
+
+                    {/* Line 1: name (truncated) + action icons on the right */}
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-[13px] font-semibold text-slate-900 leading-tight truncate">
+                          {product.name}
+                        </span>
+                        {cat && (
+                          <span
+                            className="text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium shrink-0 whitespace-nowrap"
+                            style={{ background: cat.colorHex || '#6b7280' }}
+                          >{cat.name}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center shrink-0">
+                        <button onClick={() => setRestockProduct(product)} className="p-1 rounded hover:bg-green-50 transition-colors" title="Restock">
+                          <RefreshCw className="w-3.5 h-3.5 text-green-600" />
+                        </button>
+                        <button onClick={() => setEditProduct(product)} className="p-1 rounded hover:bg-blue-50 transition-colors" title="Edit">
+                          <Pencil className="w-3.5 h-3.5 text-blue-500" />
+                        </button>
+                        <button onClick={() => handleDelete(product)} className="p-1 rounded hover:bg-red-50 transition-colors" title="Archive">
+                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                        </button>
+                      </div>
                     </div>
-                    {/* Line 2: badge + prices — never wraps, scrolls horizontally */}
-                    <div className="flex items-center gap-2 mt-0.5 overflow-x-auto no-scrollbar">
+
+                    {/* Line 2: stock badge + buy + sell + margin — full row width, no competition */}
+                    <div className="flex items-center gap-2 mt-0.5">
                       <StockBadge
                         stock={product.stockQuantity}
                         reorderLevel={product.reorderLevel}
                         className="shrink-0 whitespace-nowrap !text-[10px]"
                       />
-                      <span className="text-[10px] text-slate-400 shrink-0 whitespace-nowrap">
+                      <span className="text-[10px] text-slate-400 whitespace-nowrap">
                         Buy: {formatCurrency(product.buyingPrice, currency)}
                       </span>
-                      <span className="text-[10px] font-medium text-slate-600 shrink-0 whitespace-nowrap">
+                      <span className="text-[10px] font-medium text-slate-700 whitespace-nowrap">
                         Sell: {formatCurrency(product.sellingPrice, currency)}
                       </span>
-                      <span className={`text-[10px] font-bold shrink-0 ${profitMarginClass(margin)}`}>
+                      <span className={`text-[10px] font-bold whitespace-nowrap ${profitMarginClass(margin)}`}>
                         {margin.toFixed(0)}%
                       </span>
                     </div>
-                  </div>
 
-                  {/* Action icons */}
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <button
-                      onClick={() => setRestockProduct(product)}
-                      className="p-1.5 rounded-lg hover:bg-green-50 transition-colors"
-                      title="Restock"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5 text-green-600" />
-                    </button>
-                    <button
-                      onClick={() => setEditProduct(product)}
-                      className="p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
-                      title="Edit"
-                    >
-                      <Pencil className="w-3.5 h-3.5 text-blue-500" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(product)}
-                      className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                      title="Archive"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                    </button>
                   </div>
                 </div>
               )
