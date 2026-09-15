@@ -26,92 +26,84 @@ export function DashboardPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col px-6 pt-8 pb-8">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-slate-950 overflow-y-auto">
 
-      {/* ── LOGO BAR ── */}
-      <div className="relative flex items-center justify-center mb-1">
-        {/* Centred brand */}
-        <div className="flex flex-col items-center gap-1">
-          <div className="flex items-center gap-2">
-            <img
-              src={logoImg}
-              alt="logo"
-              className="w-8 h-8 rounded-full object-cover border-2 border-red-600"
-            />
-            <span className="text-[15px] font-extrabold tracking-widest text-slate-900 dark:text-white uppercase">
-              {shopName}
-            </span>
+      {/* ── TOP BAR ── */}
+      <div className="flex items-center justify-between px-5 pt-6 pb-0 shrink-0">
+        {/* Logo mark + shop name */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center shadow-sm overflow-hidden">
+            <img src={logoImg} alt="logo" className="w-full h-full object-cover" />
           </div>
-          <p className="text-[9px] tracking-[0.18em] text-slate-400 uppercase">
-            WE STOCK IT ALL.
-          </p>
+          <div>
+            <p className="text-[11px] font-extrabold tracking-widest text-red-600 uppercase leading-none">
+              {shopName}
+            </p>
+            <p className="text-[9px] text-slate-400 tracking-widest uppercase mt-0.5">
+              AUTO PARTS &amp; ACCESSORIES
+            </p>
+          </div>
         </div>
 
-        {/* Menu — absolute so it doesn't push logo off-centre */}
+        {/* Hamburger */}
         <button
           onClick={() => setMenuOpen(true)}
-          className="absolute right-0 top-0 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center"
+          className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center"
           aria-label="Open menu"
         >
-          <Menu className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+          <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </button>
       </div>
 
       {/* ── HERO IMAGE ── */}
-      <div className="flex-1 flex items-center justify-center py-3 min-h-0">
+      <div className="flex justify-center px-6 pt-5 pb-2">
         <img
           src={carouselImg}
           alt="Auto mechanic"
-          className="w-full max-w-[300px] max-h-[260px] object-contain"
+          className="w-full max-w-[320px] object-contain"
         />
       </div>
 
       {/* ── HEADLINE ── */}
-      <div className="text-center mb-4">
-        <h1 className="text-[26px] font-extrabold text-slate-900 dark:text-white leading-tight">
+      <div className="text-center px-6 pb-1">
+        <h1 className="text-[27px] font-extrabold text-slate-900 dark:text-white leading-snug tracking-tight">
           Your Auto Spares
         </h1>
-        <h1 className="text-[26px] font-extrabold text-red-600 leading-tight">
+        <h1 className="text-[27px] font-extrabold text-red-600 leading-snug tracking-tight">
           At Your Fingertips
         </h1>
-        <p className="text-slate-400 dark:text-slate-500 text-[13px] mt-2">
+        <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">
           Manage stock &middot; Process sales &middot; Track profit
         </p>
       </div>
 
       {/* ── TODAY'S STATS ── */}
-      <div className="grid grid-cols-3 mb-4 bg-slate-50 dark:bg-slate-800 rounded-2xl px-3 py-3 border border-slate-100 dark:border-slate-700">
+      <div className="mx-5 mt-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-4 py-3 grid grid-cols-3">
         <div className="text-center">
-          <div className="text-[13px] font-bold text-slate-900 dark:text-white tabular-nums leading-tight">
+          <div className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
             {formatCurrency(stats?.todayRevenue ?? 0, currency)}
           </div>
-          <div className="text-[9px] uppercase tracking-widest text-slate-400 mt-0.5">Revenue</div>
+          <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-0.5">Revenue</div>
         </div>
         <div className="text-center border-x border-slate-200 dark:border-slate-700">
-          <div className="text-[13px] font-bold text-green-600 tabular-nums leading-tight">
+          <div className="text-sm font-bold text-green-600 tabular-nums">
             {formatCurrency(stats?.todayProfit ?? 0, currency)}
           </div>
-          <div className="text-[9px] uppercase tracking-widest text-slate-400 mt-0.5">Profit</div>
+          <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-0.5">Profit</div>
         </div>
         <div className="text-center">
-          <div className="text-[13px] font-bold text-slate-900 dark:text-white tabular-nums leading-tight">
+          <div className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
             {stats?.todaySalesCount ?? 0}
           </div>
-          <div className="text-[9px] uppercase tracking-widest text-slate-400 mt-0.5">Sales</div>
+          <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-0.5">Sales</div>
         </div>
       </div>
 
-      {/* ── DOTS ── */}
-      <div className="flex justify-center gap-2 mb-5">
-        <div className="w-2.5 h-2.5 rounded-full bg-red-600" />
-        <div className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700" />
-      </div>
-
-      {/* ── LOW STOCK ALERT (conditional) ── */}
+      {/* ── LOW STOCK ALERT ── */}
       {(alerts?.totalAlerts ?? 0) > 0 && (
         <button
           onClick={() => navigate('/alerts')}
-          className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-2.5 mb-4 text-left w-full"
+          className="mx-5 mt-3 flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-left"
         >
           <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
           <span className="text-xs text-amber-700 dark:text-amber-400">
@@ -121,24 +113,24 @@ export function DashboardPage() {
         </button>
       )}
 
-      {/* ── PRIMARY BUTTON ── */}
-      <button
-        onClick={() => navigate('/pos')}
-        className="w-full h-14 rounded-2xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-[15px] font-bold tracking-wide shadow-md active:scale-[0.98] transition-all touch-manipulation"
-      >
-        SELL NOW
-      </button>
+      {/* ── ACTION BUTTONS ── */}
+      <div className="px-5 mt-5 pb-10 space-y-3">
+        {/* Primary */}
+        <button
+          onClick={() => navigate('/pos')}
+          className="w-full h-14 rounded-2xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-base font-bold shadow-lg active:scale-[0.98] transition-all touch-manipulation"
+        >
+          SELL NOW
+        </button>
 
-      {/* ── SECONDARY LINK ── */}
-      <p className="text-center mt-4 text-[13px] text-slate-400 dark:text-slate-500">
-        Need to add stock?{' '}
+        {/* Secondary */}
         <button
           onClick={() => navigate('/inventory')}
-          className="text-red-600 font-semibold"
+          className="w-full h-14 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-base font-bold hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all touch-manipulation"
         >
-          Stock Entry
+          STOCK ENTRY
         </button>
-      </p>
+      </div>
 
       {/* ── SLIDE-OVER MENU ── */}
       {menuOpen && (
