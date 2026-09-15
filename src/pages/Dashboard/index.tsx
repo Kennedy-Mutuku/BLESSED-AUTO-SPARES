@@ -7,6 +7,7 @@ import { useSettings } from '@/hooks/useLocalSettings'
 import { formatCurrency } from '@/lib/utils'
 import logoImg from '@/assets/logo.png'
 import carouselImg from '@/assets/carousel 1.jpg'
+import dominionLogo from '@/assets/dominion softwares main logo.png'
 
 export function DashboardPage() {
   const navigate = useNavigate()
@@ -130,6 +131,30 @@ export function DashboardPage() {
         >
           STOCK ENTRY
         </button>
+      </div>
+
+      {/* ── POWERED BY FOOTER ── */}
+      <div className="mt-6 mb-2">
+        <div className="border-t border-slate-100 pt-4 flex justify-center">
+          <a
+            href="https://dominionsoftwares.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors group"
+          >
+            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-medium group-hover:text-slate-500">
+              Powered by
+            </span>
+            <img
+              src={dominionLogo}
+              alt="Dominion Softwares"
+              className="h-6 w-auto object-contain"
+            />
+            <span className="text-[11px] font-bold text-slate-600 group-hover:text-slate-800 tracking-wide">
+              Dominion Softwares
+            </span>
+          </a>
+        </div>
       </div>
 
       {/* ── SLIDE-OVER MENU ── */}
