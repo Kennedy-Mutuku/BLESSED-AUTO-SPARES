@@ -26,7 +26,7 @@ export function DashboardPage() {
   ]
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-slate-950 overflow-y-auto">
+    <div className="flex flex-col min-h-screen bg-white overflow-y-auto">
 
       {/* ── TOP BAR ── */}
       <div className="flex items-center justify-between px-5 pt-6 pb-0 shrink-0">
