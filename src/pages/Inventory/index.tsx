@@ -21,6 +21,7 @@ export function InventoryPage() {
   const [addOpen, setAddOpen] = useState(false)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
   const [restockProduct, setRestockProduct] = useState<Product | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const { data: products = [], isLoading } = useProducts()
   const { data: categories = [] } = useCategories()
@@ -160,12 +161,13 @@ export function InventoryPage() {
                     {index + 1}
                   </span>
 
-                  {/* Thumbnail */}
+                  {/* Thumbnail — tap to preview */}
                   {product.imageDataUrl ? (
                     <img
                       src={product.imageDataUrl}
                       alt={product.name}
-                      className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-100"
+                      className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-100 cursor-pointer active:scale-95 transition-transform"
+                      onClick={() => setPhotoPreview(product.imageDataUrl!)}
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-lg bg-slate-100 shrink-0 flex items-center justify-center">
@@ -175,26 +177,32 @@ export function InventoryPage() {
 
                   {/* Product info */}
                   <div className="flex-1 min-w-0">
+                    {/* Line 1: name + category */}
                     <div className="flex items-center gap-1.5">
                       <span className="text-[13px] font-semibold text-slate-900 leading-tight truncate">
                         {product.name}
                       </span>
                       {cat && (
                         <span
-                          className="text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium shrink-0"
+                          className="text-[9px] px-1.5 py-0.5 rounded-full text-white font-medium shrink-0 whitespace-nowrap"
                           style={{ background: cat.colorHex || '#6b7280' }}
                         >{cat.name}</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <StockBadge stock={product.stockQuantity} reorderLevel={product.reorderLevel} />
-                      <span className="text-[10px] text-slate-400">
+                    {/* Line 2: badge + prices — never wraps, scrolls horizontally */}
+                    <div className="flex items-center gap-2 mt-0.5 overflow-x-auto no-scrollbar">
+                      <StockBadge
+                        stock={product.stockQuantity}
+                        reorderLevel={product.reorderLevel}
+                        className="shrink-0 whitespace-nowrap !text-[10px]"
+                      />
+                      <span className="text-[10px] text-slate-400 shrink-0 whitespace-nowrap">
                         Buy: {formatCurrency(product.buyingPrice, currency)}
                       </span>
-                      <span className="text-[10px] font-medium text-slate-600">
+                      <span className="text-[10px] font-medium text-slate-600 shrink-0 whitespace-nowrap">
                         Sell: {formatCurrency(product.sellingPrice, currency)}
                       </span>
-                      <span className={`text-[10px] font-bold ${profitMarginClass(margin)}`}>
+                      <span className={`text-[10px] font-bold shrink-0 ${profitMarginClass(margin)}`}>
                         {margin.toFixed(0)}%
                       </span>
                     </div>
@@ -230,6 +238,26 @@ export function InventoryPage() {
           </div>
         )}
       </div>
+
+      {/* ── PHOTO LIGHTBOX ── */}
+      {photoPreview && (
+        <div
+          className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-6"
+          onClick={() => setPhotoPreview(null)}
+        >
+          <img
+            src={photoPreview}
+            alt="Product photo"
+            className="max-w-full max-h-full rounded-2xl object-contain shadow-2xl"
+          />
+          <button
+            className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white text-2xl leading-none transition-colors"
+            onClick={() => setPhotoPreview(null)}
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* Modals */}
       <ProductFormModal open={addOpen} onClose={() => setAddOpen(false)} />
