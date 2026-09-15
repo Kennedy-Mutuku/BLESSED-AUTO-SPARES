@@ -27,134 +27,131 @@ export function DashboardPage() {
   ]
 
   return (
-    <div className="flex flex-col min-h-screen bg-white overflow-y-auto">
+    <div className="h-dvh bg-white flex flex-col overflow-hidden">
 
-      {/* ── TOP BAR ── */}
-      <div className="flex items-center justify-between px-5 py-4 bg-slate-900 shadow-md shrink-0">
-        {/* Logo mark + shop name */}
+      {/* ── HEADER ── */}
+      <div className="flex items-center justify-between px-5 py-3 bg-slate-900 shadow-md shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-red-500 shadow-sm">
+          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-red-500 shadow-sm shrink-0">
             <img src={logoImg} alt="logo" className="w-full h-full object-cover" />
           </div>
           <div>
-            <p className="text-[18px] font-black tracking-wide text-white uppercase leading-none drop-shadow-sm">
+            <p className="text-[17px] font-black tracking-wide text-white uppercase leading-none drop-shadow-sm">
               {shopName}
             </p>
-            <p className="text-[9px] text-red-400 tracking-widest uppercase mt-1 font-semibold">
+            <p className="text-[9px] text-red-400 tracking-widest uppercase mt-0.5 font-semibold">
               AUTO PARTS &amp; ACCESSORIES
             </p>
           </div>
         </div>
-
-        {/* Hamburger */}
         <button
           onClick={() => setMenuOpen(true)}
-          className="w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors"
+          className="w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors shrink-0"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5 text-white" />
         </button>
       </div>
 
-      {/* ── HERO IMAGE ── */}
-      <div className="flex justify-center px-6 pt-5 pb-2">
+      {/* ── HERO IMAGE — grows to fill leftover space ── */}
+      <div className="flex-1 flex items-center justify-center min-h-0 px-6 py-2">
         <img
           src={carouselImg}
           alt="Auto mechanic"
-          className="w-full max-w-[320px] object-contain"
+          className="max-h-full w-auto max-w-full object-contain"
         />
       </div>
 
-      {/* ── HEADLINE ── */}
-      <div className="text-center px-6 pb-1">
-        <h1 className="text-[27px] font-extrabold text-slate-900 dark:text-white leading-snug tracking-tight">
-          Your Auto Spares
-        </h1>
-        <h1 className="text-[27px] font-extrabold text-red-600 leading-snug tracking-tight">
-          At Your Fingertips
-        </h1>
-        <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">
-          Manage stock &middot; Process sales &middot; Track profit
-        </p>
-      </div>
+      {/* ── BOTTOM BLOCK — fixed height content ── */}
+      <div className="shrink-0 px-5 pb-4 space-y-2.5">
 
-      {/* ── TODAY'S STATS ── */}
-      <div className="mx-5 mt-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-4 py-3 grid grid-cols-3">
+        {/* Headline */}
         <div className="text-center">
-          <div className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
-            {formatCurrency(stats?.todayRevenue ?? 0, currency)}
-          </div>
-          <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-0.5">Revenue</div>
+          <h1 className="text-[22px] font-extrabold text-slate-900 leading-tight tracking-tight">
+            Your Auto Spares
+          </h1>
+          <h1 className="text-[22px] font-extrabold text-red-600 leading-tight tracking-tight">
+            At Your Fingertips
+          </h1>
+          <p className="text-slate-400 text-[11px] mt-1">
+            Manage stock &middot; Process sales &middot; Track profit
+          </p>
         </div>
-        <div className="text-center border-x border-slate-200 dark:border-slate-700">
-          <div className="text-sm font-bold text-green-600 tabular-nums">
-            {formatCurrency(stats?.todayProfit ?? 0, currency)}
-          </div>
-          <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-0.5">Profit</div>
-        </div>
-        <div className="text-center">
-          <div className="text-sm font-bold text-slate-900 dark:text-white tabular-nums">
-            {stats?.todaySalesCount ?? 0}
-          </div>
-          <div className="text-[10px] uppercase tracking-wide text-slate-400 mt-0.5">Sales</div>
-        </div>
-      </div>
 
-      {/* ── LOW STOCK ALERT ── */}
-      {(alerts?.totalAlerts ?? 0) > 0 && (
-        <button
-          onClick={() => navigate('/alerts')}
-          className="mx-5 mt-3 flex items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-left"
-        >
-          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
-          <span className="text-xs text-amber-700 dark:text-amber-400">
-            <strong>{alerts?.totalAlerts}</strong> item{alerts?.totalAlerts !== 1 ? 's' : ''} need restocking
-          </span>
-          <span className="ml-auto text-xs text-amber-500">View &#8594;</span>
-        </button>
-      )}
+        {/* Stats */}
+        <div className="grid grid-cols-3 rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+          <div className="text-center">
+            <div className="text-[12px] font-bold text-slate-900 tabular-nums leading-tight">
+              {formatCurrency(stats?.todayRevenue ?? 0, currency)}
+            </div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Revenue</div>
+          </div>
+          <div className="text-center border-x border-slate-200">
+            <div className="text-[12px] font-bold text-green-600 tabular-nums leading-tight">
+              {formatCurrency(stats?.todayProfit ?? 0, currency)}
+            </div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Profit</div>
+          </div>
+          <div className="text-center">
+            <div className="text-[12px] font-bold text-slate-900 tabular-nums leading-tight">
+              {stats?.todaySalesCount ?? 0}
+            </div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Sales</div>
+          </div>
+        </div>
 
-      {/* ── ACTION BUTTONS ── */}
-      <div className="px-5 mt-5 pb-10 space-y-3">
-        {/* Primary */}
+        {/* Low stock alert */}
+        {(alerts?.totalAlerts ?? 0) > 0 && (
+          <button
+            onClick={() => navigate('/alerts')}
+            className="w-full flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-left"
+          >
+            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+            <span className="text-xs text-amber-700">
+              <strong>{alerts?.totalAlerts}</strong> item{alerts?.totalAlerts !== 1 ? 's' : ''} need restocking
+            </span>
+            <span className="ml-auto text-xs text-amber-500">View &#8594;</span>
+          </button>
+        )}
+
+        {/* SELL NOW */}
         <button
           onClick={() => navigate('/pos')}
-          className="w-full h-14 rounded-2xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-base font-bold shadow-lg active:scale-[0.98] transition-all touch-manipulation"
+          className="w-full h-12 rounded-2xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-[15px] font-bold shadow-md active:scale-[0.98] transition-all touch-manipulation"
         >
           SELL NOW
         </button>
 
-        {/* Secondary */}
+        {/* STOCK ENTRY */}
         <button
           onClick={() => navigate('/inventory')}
-          className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-white text-base font-bold shadow-md active:scale-[0.98] transition-all touch-manipulation"
+          className="w-full h-12 rounded-2xl bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-white text-[15px] font-bold shadow-md active:scale-[0.98] transition-all touch-manipulation"
         >
           STOCK ENTRY
         </button>
-      </div>
 
-      {/* ── POWERED BY FOOTER ── */}
-      <div className="mt-6 mb-2">
-        <div className="border-t border-slate-100 pt-4 flex justify-center">
+        {/* Powered by footer */}
+        <div className="border-t border-slate-100 pt-2 flex justify-center">
           <a
             href="https://dominionsoftwares.org/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl hover:bg-slate-50 transition-colors group"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg hover:bg-slate-50 transition-colors group"
           >
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-medium group-hover:text-slate-500">
+            <span className="text-[9px] text-slate-400 uppercase tracking-widest font-medium">
               Powered by
             </span>
             <img
               src={dominionLogo}
               alt="Dominion Softwares"
-              className="h-6 w-auto object-contain"
+              className="h-5 w-auto object-contain"
             />
-            <span className="text-[11px] font-bold text-slate-600 group-hover:text-slate-800 tracking-wide">
+            <span className="text-[10px] font-bold text-slate-500 group-hover:text-slate-700 tracking-wide">
               Dominion Softwares
             </span>
           </a>
         </div>
+
       </div>
 
       {/* ── SLIDE-OVER MENU ── */}
