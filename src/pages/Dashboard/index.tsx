@@ -6,6 +6,7 @@ import { useStockAlerts } from '@/hooks/useStockAlerts'
 import { useSettings } from '@/hooks/useLocalSettings'
 import { formatCurrency } from '@/lib/utils'
 import logoImg from '@/assets/logo.png'
+import carouselImg from '@/assets/carousel 1.jpg'
 
 export function DashboardPage() {
   const navigate = useNavigate()
@@ -55,11 +56,11 @@ export function DashboardPage() {
       </div>
 
       {/* ── HERO IMAGE ── */}
-      <div className="flex justify-center px-8 pt-6 pb-2">
+      <div className="flex justify-center px-6 pt-5 pb-2">
         <img
-          src={logoImg}
-          alt="Auto Spares"
-          className="w-full max-w-[300px] object-contain drop-shadow-md"
+          src={carouselImg}
+          alt="Auto mechanic"
+          className="w-full max-w-[320px] object-contain"
         />
       </div>
 
