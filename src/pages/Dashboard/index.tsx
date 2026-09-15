@@ -126,7 +126,7 @@ export function DashboardPage() {
         {/* Secondary */}
         <button
           onClick={() => navigate('/inventory')}
-          className="w-full h-14 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-base font-bold hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all touch-manipulation"
+          className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-slate-800 active:bg-slate-700 text-white text-base font-bold shadow-md active:scale-[0.98] transition-all touch-manipulation"
         >
           STOCK ENTRY
         </button>
