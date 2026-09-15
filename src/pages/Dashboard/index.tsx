@@ -154,28 +154,41 @@ export function DashboardPage() {
 
       </div>
 
-      {/* ── SLIDE-OVER MENU ── */}
+      {/* ── DROPDOWN MENU ── */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMenuOpen(false)} />
-          <div className="relative ml-auto w-64 bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
-              <span className="font-semibold text-slate-900 dark:text-slate-100">Menu</span>
-              <button onClick={() => setMenuOpen(false)} aria-label="Close menu">
-                <X className="w-5 h-5 text-slate-500" />
+        <div className="fixed inset-0 z-50" onClick={() => setMenuOpen(false)}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/30" />
+
+          {/* Card — anchored top-right, sized to content */}
+          <div
+            className="absolute top-16 right-4 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header row */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+              <span className="text-sm font-bold text-slate-800">Menu</span>
+              <button
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+                className="w-7 h-7 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
-            <nav className="flex-1 p-4 space-y-1">
+
+            {/* Nav items */}
+            <nav className="py-1">
               {menuItems.map((item) => (
                 <button
                   key={item.path}
                   onClick={() => { navigate(item.path); setMenuOpen(false) }}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-left transition-colors"
                 >
-                  <item.icon className="w-5 h-5 text-slate-500" />
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{item.label}</span>
+                  <item.icon className="w-4 h-4 text-slate-400 shrink-0" />
+                  <span className="text-sm font-medium text-slate-700">{item.label}</span>
                   {item.badge != null && item.badge > 0 && (
-                    <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                    <span className="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
                       {item.badge}
                     </span>
                   )}
