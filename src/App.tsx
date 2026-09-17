@@ -7,7 +7,6 @@ import { POSPage } from '@/pages/POS'
 import { SalesLogPage } from '@/pages/SalesLog'
 import { StockAlertsPage } from '@/pages/StockAlerts'
 import { ReportsPage } from '@/pages/Reports'
-import { SettingsPage } from '@/pages/Settings'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,7 +29,6 @@ export default function App() {
             <Route path="/sales" element={<SalesLogPage />} />
             <Route path="/alerts" element={<StockAlertsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

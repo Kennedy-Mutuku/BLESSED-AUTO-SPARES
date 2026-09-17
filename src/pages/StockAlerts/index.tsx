@@ -50,53 +50,60 @@ export function StockAlertsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen p-4">
-      <PageHeader
-        title="Stock Alerts"
-        subtitle={`${data?.totalAlerts ?? 0} items need attention`}
-        backTo="/"
-      />
+    <div className="flex flex-col h-dvh bg-white overflow-hidden">
 
-      {isLoading ? (
-        <div className="text-center py-12 text-slate-400">Loading...</div>
-      ) : (
-        <Tabs defaultValue="low">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="low" className="flex-1">
-              Low Stock
-              {lowStock.length > 0 && (
-                <span className="ml-1.5 bg-amber-500 text-white text-xs rounded-full px-1.5">{lowStock.length}</span>
+      {/* ── STICKY HEADER ── */}
+      <div className="shrink-0 px-4 pt-4 bg-red-600">
+        <PageHeader
+          title="Stock Alerts"
+          subtitle={`${data?.totalAlerts ?? 0} items need attention`}
+          backTo="/"
+        />
+      </div>
+
+      {/* ── SCROLLABLE CONTENT ── */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        {isLoading ? (
+          <div className="text-center py-12 text-slate-400">Loading...</div>
+        ) : (
+          <Tabs defaultValue="low">
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="low" className="flex-1">
+                Low Stock
+                {lowStock.length > 0 && (
+                  <span className="ml-1.5 bg-amber-500 text-white text-xs rounded-full px-1.5">{lowStock.length}</span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="out" className="flex-1">
+                Out of Stock
+                {outOfStock.length > 0 && (
+                  <span className="ml-1.5 bg-red-500 text-white text-xs rounded-full px-1.5">{outOfStock.length}</span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="low">
+              {lowStock.length === 0 ? (
+                <EmptyState icon={AlertTriangle} title="No low stock items" description="All products are stocked above reorder levels" />
+              ) : (
+                <div className="space-y-2 pb-6">
+                  {lowStock.map((p) => <ProductCard key={p.id} product={p} />)}
+                </div>
               )}
-            </TabsTrigger>
-            <TabsTrigger value="out" className="flex-1">
-              Out of Stock
-              {outOfStock.length > 0 && (
-                <span className="ml-1.5 bg-red-500 text-white text-xs rounded-full px-1.5">{outOfStock.length}</span>
+            </TabsContent>
+
+            <TabsContent value="out">
+              {outOfStock.length === 0 ? (
+                <EmptyState icon={AlertTriangle} title="No out-of-stock items" description="All products have stock available" />
+              ) : (
+                <div className="space-y-2 pb-6">
+                  {outOfStock.map((p) => <ProductCard key={p.id} product={p} />)}
+                </div>
               )}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="low">
-            {lowStock.length === 0 ? (
-              <EmptyState icon={AlertTriangle} title="No low stock items" description="All products are stocked above reorder levels" />
-            ) : (
-              <div className="space-y-2">
-                {lowStock.map((p) => <ProductCard key={p.id} product={p} />)}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="out">
-            {outOfStock.length === 0 ? (
-              <EmptyState icon={AlertTriangle} title="No out-of-stock items" description="All products have stock available" />
-            ) : (
-              <div className="space-y-2">
-                {outOfStock.map((p) => <ProductCard key={p.id} product={p} />)}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      )}
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
 
       <RestockModal open={!!restockProduct} onClose={() => setRestockProduct(null)} product={restockProduct} />
     </div>

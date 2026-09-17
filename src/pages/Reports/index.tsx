@@ -110,21 +110,28 @@ export function ReportsPage() {
   const totalProfit = sales.reduce((s, x) => s + x.totalProfit, 0)
 
   return (
-    <div className="flex flex-col min-h-screen p-4">
-      <PageHeader
-        title="Reports"
-        backTo="/"
-        actions={
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-36">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {PERIOD_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        }
-      />
+    <div className="flex flex-col h-dvh bg-white overflow-hidden">
+
+      {/* ── STICKY HEADER ── */}
+      <div className="shrink-0 px-4 pt-4 bg-red-600">
+        <PageHeader
+          title="Reports"
+          backTo="/"
+          actions={
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-32 h-8 bg-white/20 border-white/30 text-white text-xs font-medium focus:ring-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PERIOD_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          }
+        />
+      </div>
+
+      {/* ── SCROLLABLE CONTENT ── */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
 
       {sales.length === 0 ? (
         <EmptyState icon={BarChart2} title="No sales data" description="Start making sales to see reports" />
@@ -248,6 +255,7 @@ export function ReportsPage() {
           )}
         </div>
       )}
+      </div>
     </div>
   )
 }

@@ -90,7 +90,7 @@ export function SettingsPage() {
   if (isLoading) return <div className="p-4 text-slate-400">Loading...</div>
 
   return (
-    <div className="flex flex-col min-h-screen p-4">
+    <div className="flex flex-col min-h-screen p-4 pb-8">
       <PageHeader title="Settings" backTo="/" />
 
       <div className="space-y-6">

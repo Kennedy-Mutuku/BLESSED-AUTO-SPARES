@@ -50,89 +50,97 @@ export function SalesLogPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen p-4">
-      <PageHeader
-        title="Sales Log"
-        subtitle={`${filtered.length} sales`}
-        backTo="/"
-        actions={
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/40 hover:border-white/70 text-white text-sm font-medium transition-colors"
-          >
-            <Download className="h-4 w-4" /> CSV
-          </button>
-        }
-      />
+    <div className="flex flex-col h-dvh bg-white overflow-hidden">
 
-      {/* Summary Row */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
-          <div className="text-xs text-slate-500 mb-1">Revenue (filtered)</div>
-          <div className="text-lg font-bold text-slate-900 dark:text-slate-100">{formatCurrency(totalRevenue, currency)}</div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
-          <div className="text-xs text-slate-500 mb-1">Profit (filtered)</div>
-          <div className="text-lg font-bold text-green-600">{formatCurrency(totalProfit, currency)}</div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="space-y-2 mb-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input className="pl-9" placeholder="Search receipt, customer, product..." value={search} onChange={(e) => setSearch(e.target.value)} />
-        </div>
-        <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Payment method" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Payment Methods</SelectItem>
-            <SelectItem value="cash">Cash</SelectItem>
-            <SelectItem value="mpesa">M-Pesa</SelectItem>
-            <SelectItem value="card">Card</SelectItem>
-            <SelectItem value="credit">Credit</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Sales List */}
-      {isLoading ? (
-        <div className="text-center py-12 text-slate-400">Loading...</div>
-      ) : filtered.length === 0 ? (
-        <EmptyState icon={FileText} title="No sales found" description="Sales will appear here once you start selling" />
-      ) : (
-        <div className="space-y-2">
-          {filtered.map((sale) => (
+      {/* ── STICKY HEADER ── */}
+      <div className="shrink-0 px-4 pt-4 bg-red-600">
+        <PageHeader
+          title="Sales Log"
+          subtitle={`${filtered.length} sales`}
+          backTo="/"
+          actions={
             <button
-              key={sale.id}
-              className="w-full bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 text-left hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
-              onClick={() => setSelectedSale(sale)}
+              onClick={handleExport}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/40 hover:border-white/70 text-white text-sm font-medium transition-colors"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm text-slate-900 dark:text-slate-100">{sale.receiptNumber}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PAYMENT_COLORS[sale.paymentMethod]}`}>
-                      {sale.paymentMethod.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-500">{formatDateTime(sale.soldAt)}</div>
-                  <div className="text-xs text-slate-400 mt-0.5">
-                    {sale.items.length} item{sale.items.length !== 1 ? 's' : ''}
-                    {sale.customerName ? ` • ${sale.customerName}` : ''}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="font-semibold text-slate-900 dark:text-slate-100">{formatCurrency(sale.subtotal, currency)}</div>
-                  <div className="text-xs text-green-600">+{formatCurrency(sale.totalProfit, currency)}</div>
-                </div>
-              </div>
+              <Download className="h-4 w-4" /> CSV
             </button>
-          ))}
+          }
+        />
+      </div>
+
+      {/* ── SCROLLABLE CONTENT ── */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+
+        {/* Summary Row */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-white rounded-xl p-3 border border-slate-100">
+            <div className="text-xs text-slate-500 mb-1">Revenue (filtered)</div>
+            <div className="text-lg font-bold text-slate-900">{formatCurrency(totalRevenue, currency)}</div>
+          </div>
+          <div className="bg-white rounded-xl p-3 border border-slate-100">
+            <div className="text-xs text-slate-500 mb-1">Profit (filtered)</div>
+            <div className="text-lg font-bold text-green-600">{formatCurrency(totalProfit, currency)}</div>
+          </div>
         </div>
-      )}
+
+        {/* Filters */}
+        <div className="space-y-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input className="pl-9" placeholder="Search receipt, customer, product..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="Payment method" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Payment Methods</SelectItem>
+              <SelectItem value="cash">Cash</SelectItem>
+              <SelectItem value="mpesa">M-Pesa</SelectItem>
+              <SelectItem value="card">Card</SelectItem>
+              <SelectItem value="credit">Credit</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Sales List */}
+        {isLoading ? (
+          <div className="text-center py-12 text-slate-400">Loading...</div>
+        ) : filtered.length === 0 ? (
+          <EmptyState icon={FileText} title="No sales found" description="Sales will appear here once you start selling" />
+        ) : (
+          <div className="space-y-2 pb-6">
+            {filtered.map((sale) => (
+              <button
+                key={sale.id}
+                className="w-full bg-white rounded-xl p-4 border border-slate-100 text-left hover:border-red-200 transition-colors"
+                onClick={() => setSelectedSale(sale)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm text-slate-900">{sale.receiptNumber}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PAYMENT_COLORS[sale.paymentMethod]}`}>
+                        {sale.paymentMethod.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500">{formatDateTime(sale.soldAt)}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">
+                      {sale.items.length} item{sale.items.length !== 1 ? 's' : ''}
+                      {sale.customerName ? ` • ${sale.customerName}` : ''}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="font-semibold text-slate-900">{formatCurrency(sale.subtotal, currency)}</div>
+                    <div className="text-xs text-green-600">+{formatCurrency(sale.totalProfit, currency)}</div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <SaleDetailModal open={!!selectedSale} onClose={() => setSelectedSale(null)} sale={selectedSale} />
     </div>

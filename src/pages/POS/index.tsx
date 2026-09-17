@@ -16,6 +16,7 @@ export function POSPage() {
   const [quantities, setQuantities] = useState<Record<string, number>>({})
   const [saving, setSaving] = useState<string | null>(null)
   const [showLog, setShowLog] = useState(true)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const { data: products = [] } = useProducts()
   const { data: settings } = useSettings()
@@ -81,27 +82,27 @@ export function POSPage() {
     <div className="flex flex-col min-h-screen">
 
       {/* ── STICKY HEADER ── */}
-      <div className="shrink-0 px-4 pt-4 pb-3 bg-slate-900">
+      <div className="shrink-0 px-4 pt-4 pb-3 bg-red-600">
         <PageHeader title="Selling" backTo="/" />
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/60" />
           <Input
-            className="pl-10 h-12 text-base bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-red-500"
-            placeholder="Search product by name or part number…"
+            className="pl-10 h-11 text-base bg-white/15 border-white/30 text-white placeholder:text-white/50 focus:border-white focus:bg-white/20"
+            placeholder="Search product…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoComplete="off"
           />
           {search && (
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xl leading-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-xl leading-none"
               onClick={() => setSearch('')}
             >×</button>
           )}
         </div>
-        <p className="text-xs text-slate-500 mt-1.5">
+        <p className="text-[11px] text-red-100 mt-1.5">
           {displayed.length} item{displayed.length !== 1 ? 's' : ''} in stock
-          {search && ` (filtered)`}
+          {search && ` · filtered`}
         </p>
       </div>
 
@@ -121,104 +122,114 @@ export function POSPage() {
               const profit = computeProfit(product)
               const isSaving = saving === product.id
               const hasInput = soldPriceStr !== '' && soldPrice > 0
+              const isExpanded = expandedId === product.id
 
               return (
-                <div key={product.id} className="flex gap-3 px-3 py-3 items-start">
+                <div key={product.id} className="bg-white dark:bg-slate-900">
 
-                  {/* Row number */}
-                  <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center shrink-0 mt-1">
-                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{index + 1}</span>
-                  </div>
+                  {/* ── COLLAPSED ROW (always visible, tap to expand) ── */}
+                  <button
+                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left"
+                    onClick={() => setExpandedId(isExpanded ? null : product.id)}
+                  >
+                    <span className="w-5 text-right text-[10px] font-bold text-slate-300 shrink-0 select-none">
+                      {index + 1}
+                    </span>
+                    <span className="flex-1 text-[13px] font-semibold text-slate-900 dark:text-slate-100 truncate leading-snug">
+                      {product.name}
+                    </span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                      product.stockQuantity === 0
+                        ? 'bg-red-100 text-red-600'
+                        : product.stockQuantity <= product.reorderLevel
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-green-100 text-green-700'
+                    }`}>
+                      {product.stockQuantity} {product.unit}
+                    </span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-300 shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {/* Product image */}
-                  {product.imageDataUrl ? (
-                    <img
-                      src={product.imageDataUrl}
-                      alt={product.name}
-                      className="w-14 h-14 rounded-xl object-cover shrink-0 border border-slate-200 dark:border-slate-600"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-700 shrink-0 flex items-center justify-center border border-slate-200 dark:border-slate-600">
-                      <Package className="w-6 h-6 text-slate-300 dark:text-slate-500" />
-                    </div>
-                  )}
+                  {/* ── EXPANDED PANEL ── */}
+                  {isExpanded && (
+                    <div className="px-3 pb-3 pt-2 bg-slate-50 dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 space-y-2">
 
-                  {/* Details + inputs */}
-                  <div className="flex-1 min-w-0 space-y-2">
-
-                    {/* Name + standard price */}
-                    <div>
-                      <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm leading-tight">
-                        {product.name}
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-500">
-                        <span>Expected price: <strong className="text-slate-700 dark:text-slate-300">{formatCurrency(product.sellingPrice, currency)}</strong></span>
-                        <span className="text-slate-300 dark:text-slate-600">·</span>
-                        <span>{product.stockQuantity} {product.unit} left</span>
-                      </div>
-                    </div>
-
-                    {/* Quantity + Price sold row */}
-                    <div className="flex gap-2 items-center">
-                      {/* Qty stepper */}
-                      <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden shrink-0">
-                        <button
-                          className="w-8 h-9 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 text-base font-medium flex items-center justify-center"
-                          onClick={() => setQuantities((p) => ({ ...p, [product.id]: Math.max(1, (p[product.id] ?? 1) - 1) }))}
-                        >−</button>
-                        <span className="w-7 text-center text-sm font-bold text-slate-900 dark:text-slate-100">{qty}</span>
-                        <button
-                          className="w-8 h-9 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 text-base font-medium flex items-center justify-center"
-                          onClick={() => setQuantities((p) => ({ ...p, [product.id]: Math.min(product.stockQuantity, (p[product.id] ?? 1) + 1) }))}
-                        >+</button>
-                      </div>
-
-                      {/* Price sold */}
-                      <div className="relative flex-1">
-                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-medium">{currency}</span>
-                        <Input
-                          type="number"
-                          inputMode="numeric"
-                          min={0}
-                          value={soldPriceStr}
-                          onChange={(e) => setSoldPrices((p) => ({ ...p, [product.id]: e.target.value }))}
-                          placeholder={`${product.sellingPrice}`}
-                          className="pl-10 h-9 text-sm"
-                        />
+                      {/* Meta row: image + price + stock */}
+                      <div className="flex gap-2.5 items-center">
+                        {product.imageDataUrl ? (
+                          <img
+                            src={product.imageDataUrl}
+                            alt={product.name}
+                            className="w-12 h-12 rounded-lg object-cover shrink-0 border border-slate-200"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-700 shrink-0 flex items-center justify-center">
+                            <Package className="w-5 h-5 text-slate-400" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[11px] text-slate-500">Expected price</div>
+                          <div className="text-[15px] font-bold text-slate-900 dark:text-slate-100 leading-tight">{formatCurrency(product.sellingPrice, currency)}</div>
+                          <div className="text-[11px] text-slate-400">{product.stockQuantity} {product.unit} in stock</div>
+                        </div>
                       </div>
 
-                      {/* Save button */}
+                      {/* Row 1: Qty stepper + price input */}
+                      <div className="flex gap-2 items-center">
+                        <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden shrink-0 bg-white dark:bg-slate-700">
+                          <button
+                            className="w-9 h-10 text-slate-600 hover:bg-slate-100 text-lg font-bold flex items-center justify-center"
+                            onClick={() => setQuantities((p) => ({ ...p, [product.id]: Math.max(1, (p[product.id] ?? 1) - 1) }))}
+                          >−</button>
+                          <span className="w-8 text-center text-sm font-bold text-slate-900 dark:text-slate-100">{qty}</span>
+                          <button
+                            className="w-9 h-10 text-slate-600 hover:bg-slate-100 text-lg font-bold flex items-center justify-center"
+                            onClick={() => setQuantities((p) => ({ ...p, [product.id]: Math.min(product.stockQuantity, (p[product.id] ?? 1) + 1) }))}
+                          >+</button>
+                        </div>
+                        <div className="relative flex-1">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-medium pointer-events-none">{currency}</span>
+                          <Input
+                            type="number"
+                            inputMode="numeric"
+                            min={0}
+                            value={soldPriceStr}
+                            onChange={(e) => setSoldPrices((p) => ({ ...p, [product.id]: e.target.value }))}
+                            placeholder={`${product.sellingPrice}`}
+                            className="pl-10 h-10 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Row 2: full-width Save button */}
                       <button
                         onClick={() => handleSave(product)}
                         disabled={isSaving || !hasInput}
-                        className={`h-9 px-4 rounded-lg text-sm font-bold shrink-0 transition-colors ${
+                        className={`w-full h-10 rounded-lg text-sm font-bold transition-colors ${
                           hasInput
-                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                            : 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+                            ? 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white'
+                            : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
                         } disabled:opacity-60`}
                       >
-                        {isSaving ? '…' : 'Save'}
+                        {isSaving ? 'Saving…' : hasInput ? `Save  ·  ${formatCurrency(soldPrice * qty, currency)}` : 'Enter price to save'}
                       </button>
-                    </div>
 
-                    {/* Profit / Loss indicator */}
-                    {profit !== null && (
-                      <div className={`rounded-lg px-2.5 py-1.5 text-xs ${profit >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                        <div className={`flex items-center gap-1.5 font-bold ${profit >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {profit >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                          {profit >= 0 ? 'Total Profit' : 'Total Loss'}:
-                          <span className="text-sm">{formatCurrency(Math.abs(profit), currency)}</span>
-                        </div>
-                        {qty > 1 && (
-                          <div className="text-slate-500 mt-0.5">
-                            {qty} {product.unit} × {formatCurrency(Math.abs(soldPrice - product.buyingPrice), currency)} per {product.unit}
-                            {' · '}total sold: {formatCurrency(soldPrice * qty, currency)}
+                      {/* Profit / Loss indicator */}
+                      {profit !== null && (
+                        <div className={`rounded-lg px-3 py-2 text-xs ${profit >= 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                          <div className={`flex items-center gap-1.5 font-bold ${profit >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {profit >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                            {profit >= 0 ? 'Profit' : 'Loss'}: {formatCurrency(Math.abs(profit), currency)}
                           </div>
-                        )}
-                      </div>
-                    )}
-
-                  </div>
+                          {qty > 1 && (
+                            <div className="text-slate-500 mt-0.5">
+                              {qty} × {formatCurrency(Math.abs(soldPrice - product.buyingPrice), currency)} per {product.unit}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -229,16 +240,16 @@ export function POSPage() {
         <div className="px-3 pb-8 mt-4">
           <button
             onClick={() => setShowLog((v) => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl"
+            className="w-full flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800 rounded-xl gap-2"
           >
-            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-300 shrink-0">
               Today's Sales
               <span className="ml-2 bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">{todaySales.length}</span>
             </span>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="text-green-600 font-semibold">Profit: {formatCurrency(todayProfit, currency)}</span>
-              <span className="text-slate-500">{formatCurrency(todayRevenue, currency)}</span>
-              {showLog ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            <div className="flex items-center gap-2 text-[11px] min-w-0 overflow-hidden">
+              <span className="text-green-600 font-semibold truncate">{formatCurrency(todayProfit, currency)}</span>
+              <span className="text-slate-400 shrink-0">profit</span>
+              {showLog ? <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
             </div>
           </button>
 
@@ -247,7 +258,8 @@ export function POSPage() {
               {todaySales.length === 0 ? (
                 <div className="text-center py-6 text-xs text-slate-400">No sales recorded today yet</div>
               ) : (
-                <table className="w-full text-xs">
+                <div className="overflow-x-auto">
+                <table className="w-full text-xs min-w-[380px]">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700">
                       <th className="text-left px-3 py-2 text-slate-400 font-medium w-6">#</th>
@@ -308,6 +320,7 @@ export function POSPage() {
                     </tr>
                   </tfoot>
                 </table>
+                </div>
               )}
             </div>
           )}

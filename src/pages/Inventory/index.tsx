@@ -57,7 +57,7 @@ export function InventoryPage() {
       <div className="shrink-0">
 
         {/* Dark bar (p-4 wrapper so PageHeader negative margins work) */}
-        <div className="px-4 pt-4 bg-slate-900">
+        <div className="px-4 pt-4 bg-red-600">
           <PageHeader
             title="Stock Entry"
             subtitle={`${products.length} product${products.length !== 1 ? 's' : ''}`}
@@ -65,7 +65,7 @@ export function InventoryPage() {
             actions={
               <button
                 onClick={() => setAddOpen(true)}
-                className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors"
+                className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white hover:bg-red-50 text-red-600 text-sm font-semibold transition-colors shadow-sm"
               >
                 <Plus className="h-4 w-4" /> Add
               </button>

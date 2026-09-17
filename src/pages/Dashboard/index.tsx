@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { BarChart2, AlertTriangle, FileText, Settings, Menu, X } from 'lucide-react'
+import { BarChart2, AlertTriangle, FileText, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { useStockAlerts } from '@/hooks/useStockAlerts'
@@ -23,42 +23,41 @@ export function DashboardPage() {
     { icon: FileText,      label: 'Sales Log',    path: '/sales' },
     { icon: AlertTriangle, label: 'Stock Alerts', path: '/alerts', badge: alerts?.totalAlerts },
     { icon: BarChart2,     label: 'Reports',      path: '/reports' },
-    { icon: Settings,      label: 'Settings',     path: '/settings' },
   ]
 
   return (
     <div className="h-dvh bg-white flex flex-col overflow-hidden">
 
       {/* ── HEADER ── */}
-      <div className="flex items-center justify-between px-5 py-3 bg-slate-900 shadow-md shrink-0">
+      <div className="flex items-center justify-between px-5 py-3 bg-red-600 shadow-md shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-red-500 shadow-sm shrink-0">
+          <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm shrink-0">
             <img src={logoImg} alt="logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <p className="text-[17px] font-black tracking-wide text-white uppercase leading-none drop-shadow-sm">
               {shopName}
             </p>
-            <p className="text-[9px] text-red-400 tracking-widest uppercase mt-0.5 font-semibold">
+            <p className="text-[9px] text-red-100 tracking-widest uppercase mt-0.5 font-semibold">
               AUTO PARTS &amp; ACCESSORIES
             </p>
           </div>
         </div>
         <button
           onClick={() => setMenuOpen(true)}
-          className="w-10 h-10 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors shrink-0"
+          className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors shrink-0"
           aria-label="Open menu"
         >
           <Menu className="w-5 h-5 text-white" />
         </button>
       </div>
 
-      {/* ── HERO IMAGE — grows to fill leftover space ── */}
-      <div className="flex-1 flex items-center justify-center min-h-0 px-6 py-2">
+      {/* ── HERO IMAGE ── */}
+      <div className="flex items-center justify-center px-6 py-1" style={{ height: 'clamp(165px, 34vh, 250px)' }}>
         <img
           src={carouselImg}
           alt="Auto mechanic"
-          className="max-h-full w-auto max-w-full object-contain"
+          className="h-full w-auto max-w-full object-contain"
         />
       </div>
 
@@ -157,36 +156,23 @@ export function DashboardPage() {
       {/* ── DROPDOWN MENU ── */}
       {menuOpen && (
         <div className="fixed inset-0 z-50" onClick={() => setMenuOpen(false)}>
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-black/20" />
 
-          {/* Card — anchored top-right, sized to content */}
+          {/* Card — flush right, exactly below the header */}
           <div
-            className="absolute top-16 right-4 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden"
+            className="absolute top-16 right-0 w-52 bg-white shadow-2xl border-l border-b border-slate-200 rounded-bl-xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header row */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-              <span className="text-sm font-bold text-slate-800">Menu</span>
-              <button
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
-                className="w-7 h-7 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors"
-              >
-                <X className="w-4 h-4 text-slate-500" />
-              </button>
-            </div>
-
-            {/* Nav items */}
-            <nav className="py-1">
-              {menuItems.map((item) => (
+            {/* Nav items — no header, straight to the point */}
+            <nav>
+              {menuItems.map((item, i) => (
                 <button
                   key={item.path}
                   onClick={() => { navigate(item.path); setMenuOpen(false) }}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-left transition-colors"
+                  className={`w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-red-50 text-left transition-colors ${i > 0 ? 'border-t border-slate-100' : ''}`}
                 >
-                  <item.icon className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span className="text-sm font-medium text-slate-700">{item.label}</span>
+                  <item.icon className="w-4 h-4 text-red-500 shrink-0" />
+                  <span className="text-[13px] font-semibold text-slate-800">{item.label}</span>
                   {item.badge != null && item.badge > 0 && (
                     <span className="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
                       {item.badge}
@@ -194,6 +180,14 @@ export function DashboardPage() {
                   )}
                 </button>
               ))}
+              {/* Close row */}
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 border-t border-slate-200 hover:bg-slate-50 transition-colors"
+              >
+                <X className="w-4 h-4 text-slate-400 shrink-0" />
+                <span className="text-[13px] font-medium text-slate-400">Close</span>
+              </button>
             </nav>
           </div>
         </div>
