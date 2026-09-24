@@ -24,6 +24,49 @@ export function useSalesByDateRange(start: number, end: number) {
   })
 }
 
+export function useResetAllSales() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      await db.transaction('rw', db.sales, db.products, db.stockHistory, async () => {
+        const allSales = await db.sales.toArray()
+
+        // Accumulate quantities sold per product
+        const restoreMap = new Map<string, number>()
+        for (const sale of allSales) {
+          for (const item of sale.items) {
+            restoreMap.set(item.productId, (restoreMap.get(item.productId) ?? 0) + item.quantity)
+          }
+        }
+
+        // Add the sold quantities back to each product
+        for (const [productId, qty] of restoreMap) {
+          const product = await db.products.get(productId)
+          if (product) {
+            await db.products.update(productId, {
+              stockQuantity: product.stockQuantity + qty,
+              updatedAt: Date.now(),
+            })
+          }
+        }
+
+        // Delete all sales and their stock history entries
+        await db.sales.clear()
+        const saleHistoryIds = await db.stockHistory
+          .filter(h => h.changeType === 'sale')
+          .primaryKeys()
+        await db.stockHistory.bulkDelete(saleHistoryIds)
+      })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['sales'] })
+      qc.invalidateQueries({ queryKey: ['products'] })
+      qc.invalidateQueries({ queryKey: ['stock-alerts'] })
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+  })
+}
+
 export function useCompleteSale() {
   const qc = useQueryClient()
   return useMutation({

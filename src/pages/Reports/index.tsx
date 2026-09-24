@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { db } from '@/db/database'
 import { useSettings } from '@/hooks/useLocalSettings'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { formatCurrency } from '@/lib/utils'
+import { useReactToPrint } from 'react-to-print'
+import { FileDown } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer,
@@ -82,12 +84,33 @@ export function ReportsPage() {
   const chartData = stats?.chartData ?? []
   const tickInterval = Math.max(0, Math.ceil(chartData.length / 6) - 1)
 
+  const printRef   = useRef<HTMLDivElement>(null)
+  const handlePrint = useReactToPrint({ contentRef: printRef })
+
+  const periodLabel = fromDate && toDate
+    ? `${formatDisplay(fromDate)} — ${formatDisplay(toDate)}`
+    : 'All Time'
+  const generatedAt = new Date().toLocaleDateString('en-KE', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+
   return (
     <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
 
       {/* ── HEADER ── */}
       <div className="shrink-0 px-4 pt-4 bg-red-600">
-        <PageHeader title="Reports" backTo="/" />
+        <PageHeader
+          title="Reports"
+          backTo="/"
+          actions={
+            <button
+              type="button"
+              onClick={() => handlePrint()}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/40 hover:border-white/70 text-white text-[12px] font-medium transition-colors disabled:opacity-40"
+            >
+              <FileDown className="h-3.5 w-3.5" /> PDF
+            </button>
+          }
+        />
       </div>
 
       {/* ── CONTENT — scrollable ── */}
@@ -235,10 +258,10 @@ export function ReportsPage() {
                       padding: '8px 12px',
                     }}
                     labelStyle={{ fontWeight: 700, color: '#1e293b', marginBottom: 4, fontSize: 11 }}
-                    formatter={(value: unknown, name: string) =>
+                    formatter={(value: unknown, name: unknown) =>
                       name === 'Sales'
                         ? [`${value} sales`, 'Sales']
-                        : [formatCurrency(value as number, currency), name]
+                        : [formatCurrency(value as number, currency), String(name ?? '')]
                     }
                   />
                   <Line yAxisId="money" type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#3b82f6', strokeWidth: 0 }} name="Revenue" />
@@ -262,6 +285,111 @@ export function ReportsPage() {
 
         <div className="h-2" />
       </div>
+
+      {/* ── HIDDEN PRINT TEMPLATE ── */}
+      <div style={{ display: 'none' }}>
+        <div ref={printRef} style={{ fontFamily: 'Georgia, serif', color: '#0f172a', padding: '36px 44px', maxWidth: '820px', margin: '0 auto' }}>
+
+          {/* ── LETTERHEAD ── */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '4px solid #dc2626', paddingBottom: '18px', marginBottom: '24px' }}>
+            <div>
+              <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#dc2626', margin: 0, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                {settings?.shopName ?? 'Blessed Auto Spares'}
+              </h1>
+              <p style={{ fontSize: '11px', color: '#64748b', margin: '4px 0 0', fontFamily: 'Arial, sans-serif' }}>
+                {[settings?.shopAddress, settings?.shopPhone].filter(Boolean).join(' · ')}
+              </p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0, fontFamily: 'Arial, sans-serif' }}>Financial Report</p>
+              <p style={{ fontSize: '11px', color: '#64748b', margin: '4px 0 0', fontFamily: 'Arial, sans-serif' }}>Period: <strong>{periodLabel}</strong></p>
+              <p style={{ fontSize: '10px', color: '#94a3b8', margin: '2px 0 0', fontFamily: 'Arial, sans-serif' }}>Generated: {generatedAt}</p>
+            </div>
+          </div>
+
+          {/* ── KPI CARDS ── */}
+          <div style={{ display: 'flex', gap: '14px', marginBottom: '28px' }}>
+            {[
+              { label: 'Sales Count',      value: String(stats?.salesCount ?? 0),                   accent: '#1e293b', textColor: '#0f172a' },
+              { label: 'Stock Worth',       value: formatCurrency(stats?.stockWorth ?? 0, currency),  accent: '#1e293b', textColor: '#0f172a' },
+              { label: 'Expected Profit',   value: formatCurrency(stats?.expectedProfit ?? 0, currency), accent: '#3b82f6', textColor: '#1d4ed8' },
+              { label: 'Profit Earned',     value: formatCurrency(stats?.profitEarned ?? 0, currency),   accent: '#16a34a', textColor: '#166534' },
+            ].map(card => (
+              <div key={card.label} style={{ flex: 1, borderLeft: `4px solid ${card.accent}`, borderRadius: '8px', border: '1px solid #e2e8f0', borderLeftWidth: '4px', borderLeftColor: card.accent, padding: '12px 14px' }}>
+                <p style={{ fontSize: '8px', color: '#94a3b8', margin: '0 0 5px', textTransform: 'uppercase', letterSpacing: '0.9px', fontFamily: 'Arial, sans-serif', fontWeight: 700 }}>{card.label}</p>
+                <p style={{ fontSize: '17px', fontWeight: 900, color: card.textColor, margin: 0, fontFamily: 'Arial, sans-serif' }}>{card.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── PERFORMANCE TABLE ── */}
+          {chartData.length > 0 && (
+            <>
+              <h2 style={{ fontSize: '12px', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '1px', fontFamily: 'Arial, sans-serif', margin: '0 0 10px', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>
+                Performance Breakdown — {fromDate && toDate ? 'Daily' : 'Monthly'}
+              </h2>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Arial, sans-serif' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#1e293b' }}>
+                    {['Period', 'Sales', 'Revenue', 'Profit', 'Margin'].map(h => (
+                      <th key={h} style={{ padding: '8px 12px', color: '#fff', fontWeight: 700, fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.6px', textAlign: h === 'Period' ? 'left' : 'right' }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {chartData.map((row, i) => {
+                    const margin = row.revenue > 0 ? ((row.profit / row.revenue) * 100).toFixed(1) : '0.0'
+                    return (
+                      <tr key={row.date} style={{ backgroundColor: i % 2 === 0 ? '#ffffff' : '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '7px 12px', fontWeight: 600, color: '#334155' }}>{row.date}</td>
+                        <td style={{ padding: '7px 12px', textAlign: 'right', color: '#475569' }}>{row.sales}</td>
+                        <td style={{ padding: '7px 12px', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>{formatCurrency(row.revenue, currency)}</td>
+                        <td style={{ padding: '7px 12px', textAlign: 'right', fontWeight: 700, color: row.profit >= 0 ? '#16a34a' : '#dc2626' }}>
+                          {row.profit >= 0 ? '+' : ''}{formatCurrency(row.profit, currency)}
+                        </td>
+                        <td style={{ padding: '7px 12px', textAlign: 'right', color: '#64748b' }}>{margin}%</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr style={{ backgroundColor: '#0f172a', borderTop: '2px solid #dc2626' }}>
+                    <td style={{ padding: '9px 12px', color: '#fff', fontWeight: 800 }}>TOTAL</td>
+                    <td style={{ padding: '9px 12px', textAlign: 'right', color: '#fff', fontWeight: 700 }}>
+                      {chartData.reduce((s, r) => s + r.sales, 0)}
+                    </td>
+                    <td style={{ padding: '9px 12px', textAlign: 'right', color: '#fff', fontWeight: 800 }}>
+                      {formatCurrency(chartData.reduce((s, r) => s + r.revenue, 0), currency)}
+                    </td>
+                    <td style={{ padding: '9px 12px', textAlign: 'right', color: '#4ade80', fontWeight: 800 }}>
+                      +{formatCurrency(chartData.reduce((s, r) => s + r.profit, 0), currency)}
+                    </td>
+                    <td style={{ padding: '9px 12px', textAlign: 'right', color: '#94a3b8', fontWeight: 700 }}>
+                      {chartData.reduce((s, r) => s + r.revenue, 0) > 0
+                        ? ((chartData.reduce((s, r) => s + r.profit, 0) / chartData.reduce((s, r) => s + r.revenue, 0)) * 100).toFixed(1)
+                        : '0.0'}%
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </>
+          )}
+
+          {/* ── FOOTER ── */}
+          <div style={{ marginTop: '32px', paddingTop: '12px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between' }}>
+            <p style={{ fontSize: '9px', color: '#94a3b8', margin: 0, fontFamily: 'Arial, sans-serif' }}>
+              {settings?.shopName ?? 'Blessed Auto Spares'} — Confidential Financial Document
+            </p>
+            <p style={{ fontSize: '9px', color: '#94a3b8', margin: 0, fontFamily: 'Arial, sans-serif' }}>
+              {generatedAt}
+            </p>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   )
 }

@@ -78,24 +78,36 @@ export function DashboardPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
-          <div className="text-center">
+        <div className="grid grid-cols-2 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden">
+          <div className="text-center px-3 py-2 border-r border-b border-slate-200">
             <div className="text-[12px] font-bold text-slate-900 tabular-nums leading-tight">
               {formatCurrency(stats?.todayRevenue ?? 0, currency)}
             </div>
-            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Revenue</div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Today's Revenue</div>
           </div>
-          <div className="text-center border-x border-slate-200">
+          <div className="text-center px-3 py-2 border-b border-slate-200">
             <div className="text-[12px] font-bold text-green-600 tabular-nums leading-tight">
               {formatCurrency(stats?.todayProfit ?? 0, currency)}
             </div>
-            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Profit</div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Today's Profit</div>
           </div>
-          <div className="text-center">
+          <div className="text-center px-3 py-2 border-r border-b border-slate-200">
             <div className="text-[12px] font-bold text-slate-900 tabular-nums leading-tight">
               {stats?.todaySalesCount ?? 0}
             </div>
-            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Sales</div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Today's Sales</div>
+          </div>
+          <div className="text-center px-3 py-2 border-b border-slate-200">
+            <div className="text-[12px] font-bold text-blue-600 tabular-nums leading-tight">
+              {formatCurrency(stats?.totalStockWorth ?? 0, currency)}
+            </div>
+            <div className="text-[9px] uppercase tracking-wide text-slate-400 mt-0.5">Stock Worth</div>
+          </div>
+          <div className="col-span-2 text-center px-3 py-2 bg-emerald-50 border-t border-emerald-100">
+            <div className="text-[13px] font-extrabold text-emerald-700 tabular-nums leading-tight">
+              {formatCurrency(stats?.expectedProfit ?? 0, currency)}
+            </div>
+            <div className="text-[9px] uppercase tracking-wide text-emerald-500 mt-0.5">Expected Profit if All Stock Sold</div>
           </div>
         </div>
 

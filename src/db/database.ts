@@ -17,15 +17,26 @@ export class BlessedAutoDb extends Dexie {
       stockHistory: 'id, productId, createdAt',
       settings: 'key',
     })
+    // v2: wipe demo data, replace with real Blessed Auto Spares catalog
+    this.version(2).stores({
+      products: 'id, name, sku, categoryId, stockQuantity, isActive',
+      categories: 'id, name',
+      sales: 'id, receiptNumber, soldAt',
+      stockHistory: 'id, productId, createdAt',
+      settings: 'key',
+    }).upgrade(async tx => {
+      await tx.table('products').clear()
+      await tx.table('categories').clear()
+    })
   }
 }
 
 export const db = new BlessedAutoDb()
 
-// Seed default settings on first run
+// Seed default settings and real product catalog on first run
 db.on('ready', async () => {
-  const count = await db.settings.count()
-  if (count === 0) {
+  const settingsCount = await db.settings.count()
+  if (settingsCount === 0) {
     await db.settings.bulkPut([
       { key: 'shopName', value: 'Blessed Auto Spares' },
       { key: 'shopPhone', value: '+254 700 000000' },
@@ -37,4 +48,5 @@ db.on('ready', async () => {
       { key: 'darkMode', value: 'false' },
     ])
   }
+
 })

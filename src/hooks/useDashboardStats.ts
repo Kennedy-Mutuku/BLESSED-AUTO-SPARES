@@ -22,12 +22,20 @@ export function useDashboardStats() {
       const lowStockCount = allProducts.filter(
         (p) => p.stockQuantity <= p.reorderLevel
       ).length
+      const totalStockWorth = allProducts.reduce(
+        (s, p) => s + p.buyingPrice * p.stockQuantity, 0
+      )
+      const expectedProfit = allProducts.reduce(
+        (s, p) => s + (p.sellingPrice - p.buyingPrice) * p.stockQuantity, 0
+      )
 
       return {
         todayRevenue,
         todayProfit,
         todaySalesCount,
         lowStockCount,
+        totalStockWorth,
+        expectedProfit,
       }
     },
   })

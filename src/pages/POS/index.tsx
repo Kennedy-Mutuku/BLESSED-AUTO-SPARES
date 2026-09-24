@@ -157,51 +157,105 @@ export function POSPage() {
 
                   {/* ── SELL PANEL ── */}
                   {isExpanded && (
-                    <div className="bg-slate-50 border-t border-slate-100 px-4 pt-3 pb-3 space-y-2.5">
+                    <div className="bg-slate-50 border-t border-slate-100 px-4 pt-3 pb-3 space-y-3">
 
+                      {/* ── INTENDED PRICE (read-only) ── */}
+                      <div className="rounded-xl bg-white border border-slate-200 px-3 py-2.5">
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+                          Intended selling price
+                        </p>
+                        {qty > 1 ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-slate-400">Per unit</span>
+                              <span className="text-[12px] font-semibold text-slate-600 tabular-nums">
+                                {formatCurrency(product.sellingPrice, currency)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-slate-400">× {qty} {product.unit}</span>
+                              <span className="text-[11px] text-slate-400 tabular-nums">
+                                {formatCurrency(product.sellingPrice, currency)} each
+                              </span>
+                            </div>
+                            <div className="border-t border-dashed border-slate-100 pt-1.5 flex items-center justify-between">
+                              <span className="text-[12px] font-bold text-slate-700">Total intended</span>
+                              <span className="text-[16px] font-extrabold text-slate-900 tabular-nums">
+                                {formatCurrency(product.sellingPrice * qty, currency)}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <span className="text-[12px] font-bold text-slate-700">Price</span>
+                            <span className="text-[18px] font-extrabold text-slate-900 tabular-nums">
+                              {formatCurrency(product.sellingPrice, currency)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ── QTY + ACTUAL SOLD PRICE ── */}
                       <div className="flex gap-2.5 items-end">
                         {/* Qty stepper */}
                         <div>
                           <p className="text-[10px] text-slate-400 mb-1">Qty</p>
                           <div className="flex items-center border border-slate-200 rounded-lg bg-white">
                             <button
+                              type="button"
                               className="w-8 h-9 text-slate-500 hover:bg-slate-50 font-semibold text-base flex items-center justify-center"
                               onClick={() => setQuantities(p => ({ ...p, [product.id]: Math.max(1, (p[product.id] ?? 1) - 1) }))}
                             >−</button>
                             <span className="w-7 text-center text-[13px] font-bold text-slate-800">{qty}</span>
                             <button
+                              type="button"
                               className="w-8 h-9 text-slate-500 hover:bg-slate-50 font-semibold text-base flex items-center justify-center"
                               onClick={() => setQuantities(p => ({ ...p, [product.id]: Math.min(product.stockQuantity, (p[product.id] ?? 1) + 1) }))}
                             >+</button>
                           </div>
                         </div>
 
-                        {/* Price input */}
+                        {/* Actual sold price input */}
                         <div className="flex-1">
-                          <p className="text-[10px] text-slate-400 mb-1">Selling price</p>
-                          <div className="flex items-center border border-slate-200 rounded-lg bg-white focus-within:border-red-400 focus-within:ring-1 focus-within:ring-red-100">
-                            <span className="pl-2.5 text-[11px] text-slate-400 shrink-0">{currency}</span>
+                          <p className="text-[10px] font-bold text-white bg-slate-800 rounded-t-lg px-2.5 pt-1.5 pb-1 uppercase tracking-wide">
+                            What did you sell it for? *
+                          </p>
+                          <div className="flex items-center border-2 border-slate-800 rounded-b-lg rounded-tr-lg bg-slate-900 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/20">
+                            <span className="pl-3 text-[12px] font-bold text-slate-400 shrink-0">{currency}</span>
                             <input
                               type="number"
                               inputMode="numeric"
                               min={0}
                               value={soldPriceStr}
                               onChange={e => setSoldPrices(p => ({ ...p, [product.id]: e.target.value }))}
-                              placeholder={String(product.sellingPrice)}
-                              className="flex-1 h-9 px-2 text-[13px] font-semibold text-slate-800 bg-transparent focus:outline-none placeholder:text-slate-300 placeholder:font-normal tabular-nums"
+                              placeholder="0"
+                              className="flex-1 h-11 px-2 text-[17px] font-bold text-white bg-transparent focus:outline-none placeholder:text-slate-600 placeholder:font-normal tabular-nums"
                             />
                           </div>
                         </div>
                       </div>
 
+                      {/* ── ACTUAL TOTAL + PROFIT ── */}
+                      {hasPrice && qty > 1 && (
+                        <div className="flex items-center justify-between px-1">
+                          <span className="text-[11px] text-slate-500">
+                            {formatCurrency(soldPrice, currency)} × {qty} =
+                          </span>
+                          <span className="text-[13px] font-bold text-slate-800 tabular-nums">
+                            {formatCurrency(soldPrice * qty, currency)}
+                          </span>
+                        </div>
+                      )}
+
                       {profit !== null && (
                         <p className={`text-[11px] ${profit >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                           {profit >= 0 ? 'Profit' : 'Loss'}: {formatCurrency(Math.abs(profit), currency)}
-                          {qty > 1 && ` (${qty} × ${formatCurrency(Math.abs(soldPrice - product.buyingPrice), currency)})`}
+                          {qty > 1 && ` (${qty} × ${formatCurrency(Math.abs(soldPrice - product.buyingPrice), currency)} each)`}
                         </p>
                       )}
 
                       <button
+                        type="button"
                         onClick={() => handleSave(product)}
                         disabled={isSaving || !hasPrice}
                         className={`w-full h-10 rounded-lg text-[13px] font-semibold transition-colors ${
@@ -210,7 +264,7 @@ export function POSPage() {
                             : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                         }`}
                       >
-                        {isSaving ? 'Saving…' : hasPrice ? `Sell — ${formatCurrency(soldPrice * qty, currency)}` : 'Enter price to record sale'}
+                        {isSaving ? 'Saving…' : hasPrice ? `Save Sale — ${formatCurrency(soldPrice * qty, currency)}` : 'Type the sold price above to continue'}
                       </button>
                     </div>
                   )}
