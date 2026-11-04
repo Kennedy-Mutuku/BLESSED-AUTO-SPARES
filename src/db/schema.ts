@@ -52,13 +52,15 @@ export interface Sale {
 export interface StockHistory {
   id: string
   productId: string
-  changeType: 'sale' | 'restock' | 'adjustment'
+  changeType: 'sale' | 'restock' | 'adjustment' | 'initial'
   quantityBefore: number
   quantityChange: number
   quantityAfter: number
   relatedSaleId: string
   note: string
   createdAt: number
+  buyingPrice?: number
+  sellingPrice?: number
 }
 
 export interface AppSetting {

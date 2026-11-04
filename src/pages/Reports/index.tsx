@@ -4,7 +4,7 @@ import { db } from '@/db/database'
 import { useSettings } from '@/hooks/useLocalSettings'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { formatCurrency } from '@/lib/utils'
-import { useReactToPrint } from 'react-to-print'
+import { exportHtmlAsPdf } from '@/lib/pdfExport'
 import { FileDown } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -84,8 +84,13 @@ export function ReportsPage() {
   const chartData = stats?.chartData ?? []
   const tickInterval = Math.max(0, Math.ceil(chartData.length / 6) - 1)
 
-  const printRef   = useRef<HTMLDivElement>(null)
-  const handlePrint = useReactToPrint({ contentRef: printRef })
+  const printRef = useRef<HTMLDivElement>(null)
+
+  async function handleExportPdf() {
+    if (printRef.current) {
+      await exportHtmlAsPdf(printRef.current.innerHTML, 'Financial-Report.pdf')
+    }
+  }
 
   const periodLabel = fromDate && toDate
     ? `${formatDisplay(fromDate)} — ${formatDisplay(toDate)}`
@@ -103,7 +108,7 @@ export function ReportsPage() {
           actions={
             <button
               type="button"
-              onClick={() => handlePrint()}
+              onClick={handleExportPdf}
               disabled={isLoading}
               className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/40 hover:border-white/70 text-white text-[12px] font-medium transition-colors disabled:opacity-40"
             >
@@ -287,7 +292,7 @@ export function ReportsPage() {
       </div>
 
       {/* ── HIDDEN PRINT TEMPLATE ── */}
-      <div style={{ display: 'none' }}>
+      <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '820px' }}>
         <div ref={printRef} style={{ fontFamily: 'Georgia, serif', color: '#0f172a', padding: '36px 44px', maxWidth: '820px', margin: '0 auto' }}>
 
           {/* ── LETTERHEAD ── */}

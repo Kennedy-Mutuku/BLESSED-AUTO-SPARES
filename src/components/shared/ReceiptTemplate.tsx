@@ -13,70 +13,93 @@ export const ReceiptTemplate = React.forwardRef<HTMLDivElement, ReceiptTemplateP
     return (
       <div
         ref={ref}
-        className="bg-white text-black font-mono text-xs w-72 mx-auto p-4"
-        style={{ fontFamily: 'monospace', fontSize: '12px', width: '72mm', padding: '8px' }}
+        style={{
+          fontFamily: "'Courier New', Courier, monospace",
+          fontSize: '12px',
+          color: '#000',
+          background: '#fff',
+          width: '80mm',
+          margin: '0 auto',
+          padding: '12px 8px',
+        }}
       >
-        <div className="text-center mb-3">
-          <div className="font-bold text-base">{settings.shopName ?? 'Blessed Auto Spares'}</div>
-          {settings.shopPhone && <div>{settings.shopPhone}</div>}
-          {settings.shopAddress && <div>{settings.shopAddress}</div>}
+        {/* Shop Header */}
+        <div style={{ textAlign: 'center', marginBottom: '10px', lineHeight: '1.5' }}>
+          <div style={{ fontSize: '16px', fontWeight: 900, letterSpacing: '1px', textTransform: 'uppercase' }}>
+            {settings.shopName ?? 'Blessed Auto Spares'}
+          </div>
+          <div style={{ fontSize: '11px' }}>Auto Parts &amp; Accessories</div>
+          {settings.shopPhone && <div style={{ fontSize: '11px' }}>{settings.shopPhone}</div>}
+          {settings.shopAddress && <div style={{ fontSize: '11px' }}>{settings.shopAddress}</div>}
         </div>
 
-        <div className="border-t border-dashed border-black my-2" />
+        <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
-        <div className="mb-2">
-          <div>Receipt: {sale.receiptNumber}</div>
-          <div>Date: {formatDateTime(sale.soldAt)}</div>
-          {sale.customerName && <div>Customer: {sale.customerName}</div>}
-          <div>Cashier: {sale.createdBy || settings.operatorName}</div>
+        {/* Receipt Meta */}
+        <div style={{ marginBottom: '8px', lineHeight: '1.6', fontSize: '11px' }}>
+          <div><strong>Receipt#:</strong> {sale.receiptNumber}</div>
+          <div><strong>Date:</strong> {formatDateTime(sale.soldAt)}</div>
+          {sale.customerName && <div><strong>Customer:</strong> {sale.customerName}</div>}
+          <div><strong>Cashier:</strong> {sale.createdBy || settings.operatorName || 'Staff'}</div>
+          <div><strong>Payment:</strong> {sale.paymentMethod.toUpperCase()}</div>
         </div>
 
-        <div className="border-t border-dashed border-black my-2" />
+        <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
-        <table className="w-full text-xs">
+        {/* Items Table */}
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px' }}>
           <thead>
-            <tr>
-              <th className="text-left">Item</th>
-              <th className="text-right">Qty</th>
-              <th className="text-right">Price</th>
-              <th className="text-right">Total</th>
+            <tr style={{ borderBottom: '1px dashed #000' }}>
+              <th style={{ textAlign: 'left', padding: '2px 0', fontWeight: 700 }}>Item</th>
+              <th style={{ textAlign: 'right', padding: '2px 3px', fontWeight: 700 }}>Qty</th>
+              <th style={{ textAlign: 'right', padding: '2px 3px', fontWeight: 700 }}>Price</th>
+              <th style={{ textAlign: 'right', padding: '2px 0', fontWeight: 700 }}>Total</th>
             </tr>
           </thead>
           <tbody>
             {sale.items.map((item, i) => (
               <tr key={i}>
-                <td className="text-left" style={{ maxWidth: '100px', wordBreak: 'break-word' }}>
+                <td style={{ padding: '3px 0', wordBreak: 'break-word', maxWidth: '110px' }}>
                   {item.productName}
                 </td>
-                <td className="text-right">{item.quantity}</td>
-                <td className="text-right">{item.sellingPriceSnapshot}</td>
-                <td className="text-right">{item.lineTotal}</td>
+                <td style={{ textAlign: 'right', padding: '3px 3px' }}>{item.quantity}</td>
+                <td style={{ textAlign: 'right', padding: '3px 3px', whiteSpace: 'nowrap' }}>
+                  {formatCurrency(item.sellingPriceSnapshot, currency)}
+                </td>
+                <td style={{ textAlign: 'right', padding: '3px 0', whiteSpace: 'nowrap' }}>
+                  {formatCurrency(item.lineTotal, currency)}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        <div className="border-t border-dashed border-black my-2" />
+        <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
-        <div className="flex justify-between font-bold">
+        {/* Totals */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 900, fontSize: '13px', marginBottom: '4px' }}>
           <span>TOTAL</span>
           <span>{formatCurrency(sale.subtotal, currency)}</span>
         </div>
-        <div className="flex justify-between">
-          <span>Payment ({sale.paymentMethod.toUpperCase()})</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+          <span>Tendered ({sale.paymentMethod.toUpperCase()})</span>
           <span>{formatCurrency(sale.amountTendered, currency)}</span>
         </div>
         {sale.changeGiven > 0 && (
-          <div className="flex justify-between">
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
             <span>Change</span>
             <span>{formatCurrency(sale.changeGiven, currency)}</span>
           </div>
         )}
 
-        <div className="border-t border-dashed border-black my-2" />
+        <div style={{ borderTop: '1px dashed #000', margin: '8px 0' }} />
 
-        <div className="text-center text-xs">
-          {settings.receiptFooter ?? 'Thank you for your business!'}
+        {/* Footer */}
+        <div style={{ textAlign: 'center', fontSize: '11px', lineHeight: '1.6' }}>
+          <div>{settings.receiptFooter ?? 'Thank you for your business!'}</div>
+          <div style={{ fontSize: '10px', marginTop: '2px', color: '#444' }}>
+            Goods once sold are not returnable
+          </div>
         </div>
       </div>
     )

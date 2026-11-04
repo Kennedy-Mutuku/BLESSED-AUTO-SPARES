@@ -67,6 +67,39 @@ export function useResetAllSales() {
   })
 }
 
+export function useDeleteSale() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (sale: Sale) => {
+      await db.transaction('rw', db.sales, db.products, db.stockHistory, async () => {
+        // Restore stock for each item sold
+        for (const item of sale.items) {
+          const product = await db.products.get(item.productId)
+          if (product) {
+            await db.products.update(item.productId, {
+              stockQuantity: product.stockQuantity + item.quantity,
+              updatedAt: Date.now(),
+            })
+          }
+        }
+        // Remove stock history records tied to this sale
+        const historyIds = await db.stockHistory
+          .filter(h => h.relatedSaleId === sale.id)
+          .primaryKeys()
+        await db.stockHistory.bulkDelete(historyIds)
+        // Delete the sale itself
+        await db.sales.delete(sale.id)
+      })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['sales'] })
+      qc.invalidateQueries({ queryKey: ['products'] })
+      qc.invalidateQueries({ queryKey: ['stock-alerts'] })
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+  })
+}
+
 export function useCompleteSale() {
   const qc = useQueryClient()
   return useMutation({

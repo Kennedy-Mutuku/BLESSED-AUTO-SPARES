@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { SaleDetailModal } from './SaleDetailModal'
 import { formatCurrency } from '@/lib/utils'
-import { useReactToPrint } from 'react-to-print'
+import { exportHtmlAsPdf } from '@/lib/pdfExport'
 
 import type { Sale } from '@/db/schema'
 import toast from 'react-hot-toast'
@@ -104,8 +104,13 @@ export function SalesLogPage() {
   const currency                        = settings?.currencySymbol ?? 'KES'
   const resetMutation                   = useResetAllSales()
 
-  const printRef   = useRef<HTMLDivElement>(null)
-  const handlePrint = useReactToPrint({ contentRef: printRef })
+  const printRef = useRef<HTMLDivElement>(null)
+
+  async function handleExportPdf() {
+    if (printRef.current) {
+      await exportHtmlAsPdf(printRef.current.innerHTML, 'Sales-Log.pdf')
+    }
+  }
 
   async function handleReset() {
     try {
@@ -163,7 +168,7 @@ export function SalesLogPage() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => handlePrint()}
+                onClick={handleExportPdf}
                 className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-white/40 hover:border-white/70 text-white text-[12px] font-medium transition-colors"
               >
                 <FileDown className="h-3.5 w-3.5" /> PDF

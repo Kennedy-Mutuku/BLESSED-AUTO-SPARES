@@ -17,7 +17,7 @@ interface RestockModalProps {
 }
 
 export function RestockModal({ open, onClose, product }: RestockModalProps) {
-  const [qty, setQty] = useState(10)
+  const [qty, setQty] = useState(0)
   const [newBuyingPrice, setNewBuyingPrice] = useState<number | ''>('')
   const [note, setNote] = useState('')
   const restock = useRestockProduct()

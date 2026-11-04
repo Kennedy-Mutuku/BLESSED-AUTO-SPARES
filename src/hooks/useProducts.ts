@@ -25,16 +25,37 @@ export function useAddProduct() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+      const now = Date.now()
       const product: Product = {
         ...data,
         id: generateId(),
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: now,
+        updatedAt: now,
       }
-      await db.products.add(product)
+      await db.transaction('rw', db.products, db.stockHistory, async () => {
+        await db.products.add(product)
+        if (product.stockQuantity > 0) {
+          await db.stockHistory.add({
+            id: generateId(),
+            productId: product.id,
+            changeType: 'initial',
+            quantityBefore: 0,
+            quantityChange: product.stockQuantity,
+            quantityAfter: product.stockQuantity,
+            relatedSaleId: '',
+            note: 'Initial stock entry',
+            createdAt: now,
+            buyingPrice: product.buyingPrice,
+            sellingPrice: product.sellingPrice,
+          })
+        }
+      })
       return product
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['products'] })
+      qc.invalidateQueries({ queryKey: ['stock-ledger'] })
+    },
   })
 }
 
@@ -96,6 +117,8 @@ export function useRestockProduct() {
           relatedSaleId: '',
           note: note ?? 'Manual restock',
           createdAt: Date.now(),
+          buyingPrice: newBuyingPrice ?? product.buyingPrice,
+          sellingPrice: product.sellingPrice,
         })
       })
     },
@@ -103,6 +126,7 @@ export function useRestockProduct() {
       qc.invalidateQueries({ queryKey: ['products'] })
       qc.invalidateQueries({ queryKey: ['stock-alerts'] })
       qc.invalidateQueries({ queryKey: ['dashboard'] })
+      qc.invalidateQueries({ queryKey: ['stock-ledger'] })
     },
   })
 }

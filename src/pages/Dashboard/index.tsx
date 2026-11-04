@@ -1,13 +1,182 @@
 import { useNavigate } from 'react-router-dom'
-import { BarChart2, AlertTriangle, FileText, Menu, X } from 'lucide-react'
+import { BarChart2, AlertTriangle, FileText, Menu, X, Settings, Lock,
+         Cloud, CloudOff, CheckCircle2, Upload, RefreshCw, AlertCircle, WifiOff } from 'lucide-react'
 import { useState } from 'react'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { useStockAlerts } from '@/hooks/useStockAlerts'
 import { useSettings } from '@/hooks/useLocalSettings'
 import { formatCurrency } from '@/lib/utils'
+import { useSyncStatus } from '@/hooks/useSyncStatus'
 import logoImg from '@/assets/logo.png'
 import carouselImg from '@/assets/carousel 1.jpg'
 import dominionLogo from '@/assets/dominion softwares main logo.png'
+
+// ── Sync Button ───────────────────────────────────────────────────────────────
+
+function SyncButton() {
+  const { state, progress, pendingCount, lastSyncAt, errorMsg, isOnline, isConfigured, sync } = useSyncStatus()
+  const [showPanel, setShowPanel] = useState(false)
+
+  // Visual config per state
+  const cfg = {
+    syncing:      { icon: RefreshCw,    iconCls: 'animate-spin text-blue-200',  pillCls: 'bg-blue-500/30 border-blue-400/40',   label: `${progress}%`,                dot: 'bg-blue-400' },
+    synced:       { icon: CheckCircle2, iconCls: 'text-green-300',              pillCls: 'bg-green-500/25 border-green-400/40', label: '100%',                         dot: 'bg-green-400' },
+    pending:      { icon: Upload,       iconCls: 'text-amber-200',              pillCls: 'bg-amber-500/25 border-amber-400/40', label: `${pendingCount} pending`,       dot: 'bg-amber-400 animate-pulse' },
+    error:        { icon: AlertCircle,  iconCls: 'text-red-300',                pillCls: 'bg-red-500/25 border-red-400/40',     label: 'Retry',                        dot: 'bg-red-400' },
+    offline:      { icon: WifiOff,      iconCls: 'text-slate-300',              pillCls: 'bg-white/10 border-white/20',         label: 'Offline',                      dot: 'bg-slate-400' },
+    unconfigured: { icon: Cloud,        iconCls: 'text-white/40',               pillCls: 'bg-white/10 border-white/20',         label: 'No server',                    dot: 'bg-white/30' },
+  }[state]
+
+  const Icon      = cfg.icon
+  const lastLabel = lastSyncAt
+    ? new Date(lastSyncAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : 'Never'
+
+  const syncPct = state === 'synced' ? 100 : state === 'syncing' ? progress : 0
+
+  return (
+    <div className="relative">
+      {/* ── Compact pill button in header ── */}
+      <button
+        onClick={() => setShowPanel(v => !v)}
+        className={`flex items-center gap-1.5 h-8 px-2.5 rounded-full border transition-all touch-manipulation ${cfg.pillCls}`}
+        aria-label="Sync status"
+      >
+        <Icon className={`w-3.5 h-3.5 shrink-0 ${cfg.iconCls}`} />
+        <span className="text-[11px] font-semibold text-white/90 leading-none whitespace-nowrap">
+          {cfg.label}
+        </span>
+        {/* Live dot */}
+        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot}`} />
+      </button>
+
+      {/* ── Detail panel (dropdown below button) ── */}
+      {showPanel && (
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-40" onClick={() => setShowPanel(false)} />
+
+          <div className="absolute right-0 top-10 z-50 w-72 bg-slate-900 rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+                <span className="text-white font-bold text-[13px]">Cloud Sync</span>
+              </div>
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                state === 'synced'  ? 'bg-green-500/20 text-green-300' :
+                state === 'pending' ? 'bg-amber-500/20 text-amber-300' :
+                state === 'syncing' ? 'bg-blue-500/20 text-blue-300'   :
+                state === 'error'   ? 'bg-red-500/20 text-red-300'     :
+                'bg-white/10 text-white/50'
+              }`}>
+                {state === 'synced'       ? 'In Sync'        :
+                 state === 'pending'      ? `${pendingCount} pending` :
+                 state === 'syncing'      ? 'Syncing…'       :
+                 state === 'error'        ? 'Failed'         :
+                 state === 'offline'      ? 'Offline'        :
+                 'Not configured'}
+              </span>
+            </div>
+
+            {/* Progress bar (syncing or synced) */}
+            {(state === 'syncing' || state === 'synced') && (
+              <div className="px-4 pt-3">
+                <div className="flex justify-between text-[11px] text-white/50 mb-1.5">
+                  <span>Upload progress</span>
+                  <span className="text-white font-semibold">{syncPct}%</span>
+                </div>
+                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      state === 'synced' ? 'bg-green-500' : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${syncPct}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Stats grid */}
+            <div className="px-4 py-3 grid grid-cols-2 gap-2">
+              <div className="bg-white/5 rounded-xl px-3 py-2.5">
+                <p className="text-[9px] text-white/40 uppercase tracking-wider font-semibold mb-0.5">Pending</p>
+                <p className={`text-[16px] font-black ${pendingCount > 0 ? 'text-amber-300' : 'text-green-300'}`}>
+                  {pendingCount}
+                </p>
+                <p className="text-[9px] text-white/30">items to sync</p>
+              </div>
+              <div className="bg-white/5 rounded-xl px-3 py-2.5">
+                <p className="text-[9px] text-white/40 uppercase tracking-wider font-semibold mb-0.5">Last Sync</p>
+                <p className="text-[13px] font-black text-white/80">{lastLabel}</p>
+                <p className="text-[9px] text-white/30">{isOnline ? 'Online' : 'Offline'}</p>
+              </div>
+            </div>
+
+            {/* Error message */}
+            {state === 'error' && errorMsg && (
+              <div className="mx-4 mb-3 bg-red-500/15 border border-red-500/30 rounded-xl px-3 py-2.5">
+                <p className="text-[11px] text-red-300 leading-relaxed">{errorMsg}</p>
+              </div>
+            )}
+
+            {/* Unconfigured help */}
+            {state === 'unconfigured' && (
+              <div className="mx-4 mb-3 bg-white/5 rounded-xl px-3 py-2.5">
+                <p className="text-[11px] text-white/50 leading-relaxed">
+                  Set <span className="text-white/80 font-mono text-[10px]">VITE_API_URL</span> in your{' '}
+                  <span className="text-white/80 font-mono text-[10px]">.env</span> file to enable cloud sync.
+                </p>
+              </div>
+            )}
+
+            {/* Sync Now button */}
+            {(state === 'pending' || state === 'error') && (
+              <div className="px-4 pb-4">
+                <button
+                  onClick={() => { sync(); setShowPanel(false) }}
+                  className="w-full h-10 bg-red-600 hover:bg-red-500 rounded-xl text-white text-[13px] font-bold flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  Sync {pendingCount > 0 ? `${pendingCount} items` : 'Now'}
+                </button>
+              </div>
+            )}
+
+            {state === 'syncing' && (
+              <div className="px-4 pb-4">
+                <div className="w-full h-10 bg-blue-600/30 rounded-xl text-blue-300 text-[13px] font-semibold flex items-center justify-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Syncing… {progress}%
+                </div>
+              </div>
+            )}
+
+            {state === 'synced' && (
+              <div className="px-4 pb-4">
+                <div className="w-full h-10 bg-green-600/20 rounded-xl text-green-300 text-[13px] font-semibold flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Fully in sync — 100%
+                </div>
+              </div>
+            )}
+
+            {state === 'offline' && (
+              <div className="px-4 pb-4">
+                <div className="w-full h-10 bg-white/5 rounded-xl text-white/40 text-[13px] font-semibold flex items-center justify-center gap-2">
+                  <CloudOff className="w-4 h-4" />
+                  Will sync when online
+                </div>
+              </div>
+            )}
+
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 export function DashboardPage() {
   const navigate = useNavigate()
@@ -23,6 +192,7 @@ export function DashboardPage() {
     { icon: FileText,      label: 'Sales Log',    path: '/sales' },
     { icon: AlertTriangle, label: 'Stock Alerts', path: '/alerts', badge: alerts?.totalAlerts },
     { icon: BarChart2,     label: 'Reports',      path: '/reports' },
+    { icon: Settings,      label: 'Settings',     path: '/settings' },
   ]
 
   return (
@@ -43,13 +213,16 @@ export function DashboardPage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setMenuOpen(true)}
-          className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors shrink-0"
-          aria-label="Open menu"
-        >
-          <Menu className="w-5 h-5 text-white" />
-        </button>
+        <div className="flex items-center gap-2">
+          <SyncButton />
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors shrink-0"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5 text-white" />
+          </button>
+        </div>
       </div>
 
       {/* ── HERO IMAGE ── */}
@@ -192,10 +365,18 @@ export function DashboardPage() {
                   )}
                 </button>
               ))}
+              {/* Lock Screen */}
+              <button
+                onClick={() => { setMenuOpen(false); window.dispatchEvent(new CustomEvent('app:lock')) }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 border-t border-slate-200 hover:bg-red-50 text-left transition-colors"
+              >
+                <Lock className="w-4 h-4 text-red-500 shrink-0" />
+                <span className="text-[13px] font-semibold text-slate-800">Lock Screen</span>
+              </button>
               {/* Close row */}
               <button
                 onClick={() => setMenuOpen(false)}
-                className="w-full flex items-center gap-2.5 px-4 py-2.5 border-t border-slate-200 hover:bg-slate-50 transition-colors"
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 border-t border-slate-100 hover:bg-slate-50 transition-colors"
               >
                 <X className="w-4 h-4 text-slate-400 shrink-0" />
                 <span className="text-[13px] font-medium text-slate-400">Close</span>
